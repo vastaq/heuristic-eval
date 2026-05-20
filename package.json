@@ -1,0 +1,13 @@
+{
+  "name": "role-eval-dataset",
+  "private": true,
+  "description": "Shared protocol and tooling for promptfoo-based role evaluation datasets.",
+  "scripts": {
+    "test": "python3 -m unittest role_eval.testsets.tests.test_scripts",
+    "py-compile": "python3 -m py_compile role_eval/testsets/scripts/*.py"
+  },
+  "devDependencies": {
+    "promptfoo": "^0.120.25",
+    "yaml": "^2.8.1"
+  }
+}

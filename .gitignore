@@ -1,0 +1,24 @@
+.DS_Store
+.env
+.venv/
+.conda/
+node_modules/
+__pycache__/
+*.pyc
+
+# Data stays local/private by default. Keep directory placeholders only.
+role_eval/testsets/canonical/*
+!role_eval/testsets/canonical/.gitkeep
+role_eval/testsets/exports/*
+!role_eval/testsets/exports/.gitkeep
+role_eval/testsets/results/*
+!role_eval/testsets/results/.gitkeep
+role_eval/testsets/seeds/*
+!role_eval/testsets/seeds/.gitkeep
+role_eval/testsets/experiments/*
+!role_eval/testsets/experiments/.gitkeep
+role_eval/testsets/replay/outputs/*
+!role_eval/testsets/replay/outputs/.gitkeep
+role_eval/testsets/evolution/events.jsonl
+role_eval/testsets/evolution/failure_patterns/*
+!role_eval/testsets/evolution/failure_patterns/.gitkeep
