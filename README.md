@@ -1,11 +1,22 @@
 # Role Evaluation Dataset
 
-This package contains the shareable protocol and tools for maintaining
-promptfoo-based role evaluation datasets.
+`role-eval-dataset` is a lightweight toolkit for maintaining promptfoo-based
+role evaluation datasets.
+
+The name is intentionally about **datasets**, not a database product:
+
+- **role**: the main target is character / persona / conversational role prompts.
+- **eval**: records are used to inspect whether a role behaves naturally,
+  usefully, and consistently.
+- **dataset**: JSON records are the editable source of truth; promptfoo YAML
+  files are generated views.
+
+The goal is not to maximize pass rate at all costs. The goal is to keep a role
+inside an acceptable experience band while avoiding prompt bloat and overfitting.
 
 It includes:
 
-- `.cursor/skills/role-eval-dataset/SKILL.md`: the agent workflow skill.
+- `.cursor/skills/role-eval-dataset/SKILL.md`: the Cursor agent workflow skill.
 - `role_eval/testsets/methodology/`: schema, taxonomy, heuristic-learning, and
   review guidance.
 - `role_eval/testsets/scripts/`: generic import, export, audit, replay, reward,
@@ -20,12 +31,62 @@ It intentionally does not include project data:
 - no replay outputs
 - no private prompts or environment files
 
-## Intended Use
+## What This Is For
 
-Use this as a lightweight shared base for role prompt evaluation datasets. Keep
-local or private data in the empty `role_eval/testsets/*` data directories, then
-use the scripts to import legacy promptfoo YAML, export generated promptfoo
-views, audit records, and validate heuristic-learning artifacts.
+Use this as a shared base when you want to:
+
+- Import legacy `test*.yaml` promptfoo cases into traceable canonical JSON.
+- Curate role conversation tests through `candidate`, `accepted`,
+  `needs_revision`, and `retired` states.
+- Export canonical records back into promptfoo YAML.
+- Learn from promptfoo failures without automatically adding more prompt rules.
+- Track reusable failure patterns, replay observations, and reward assessments.
+
+It is currently scoped to role conversation evaluation. Non-role datasets can
+reuse some scripts and layering ideas, but should use separate schemas, rubrics,
+and promotion rules.
+
+## Repository Layout
+
+```text
+.cursor/skills/role-eval-dataset/
+  SKILL.md                 # Cursor skill for agent-assisted dataset work
+
+role_eval/testsets/
+  methodology/             # Shared schema, taxonomy, HL, and review guidance
+  scripts/                 # Import/export/audit/replay/validation tools
+  tests/                   # Regression tests for the scripts
+  canonical/               # Local canonical JSON datasets; intentionally empty
+  exports/                 # Generated promptfoo YAML views; intentionally empty
+  seeds/                   # Imported source snapshots; intentionally empty
+  experiments/             # HL candidate units and assessments; intentionally empty
+  replay/                  # Replay configs, contexts, and outputs
+  evolution/               # Event logs and failure patterns
+```
+
+### About `.cursor/`
+
+The `.cursor/` directory is included so Cursor can discover the skill directly
+when this repository is opened as a project.
+
+It is not where dataset records live. The actual dataset system lives under
+`role_eval/testsets/`.
+
+If you are not using Cursor, you can still use all methodology docs and scripts
+normally. The skill file is plain Markdown and can be read or adapted by other
+agents.
+
+## Basic Workflow
+
+1. Keep raw promptfoo YAML unchanged.
+2. Import or author canonical JSON records under `role_eval/testsets/canonical/`.
+3. Review records before promotion; broad imports are intake pools, not gates.
+4. Export promptfoo YAML views into `role_eval/testsets/exports/`.
+5. Run promptfoo with your project config.
+6. Convert failures into observations, candidate units, rubric revisions, or
+   retirements.
+7. Stop tuning when the role is inside the acceptable band; do not add prompt
+   constraints just to satisfy low-value failures.
 
 ## Quick Checks
 
@@ -35,6 +96,21 @@ python3 -m py_compile role_eval/testsets/scripts/*.py
 python3 -m unittest role_eval.testsets.tests.test_scripts
 ```
 
+## Data Policy
+
+This repository is meant to share protocol and tooling first. Keep private or
+large project data outside the repo, or in ignored local directories.
+
+The `.gitignore` keeps these data directories empty by default:
+
+- `role_eval/testsets/canonical/`
+- `role_eval/testsets/exports/`
+- `role_eval/testsets/results/`
+- `role_eval/testsets/seeds/`
+- `role_eval/testsets/experiments/`
+- `role_eval/testsets/replay/outputs/`
+- `role_eval/testsets/evolution/events.jsonl`
+
 ## Data Boundary
 
 Raw and intake data may be incomplete, but must remain traceable. Core, gate,
@@ -43,3 +119,12 @@ traceability, and promotion evidence.
 
 Dry-run replay validates wiring only. It is not reward evidence and should not
 be used to promote records.
+
+## Prompt Bloat Guardrail
+
+A failed test is not automatically a reason to add prompt constraints. Before
+tuning a role prompt, decide whether the failure is meaningful, repeated,
+natural, and worth the added stiffness.
+
+Prefer `accept_variance`, `revise_rubric`, `needs_revision`, or `retired` when a
+case pressures the prompt toward rigid, over-specific behavior.

@@ -12,14 +12,15 @@ evaluation in promptfoo workflows. Canonical JSON is the editable source of
 truth. Promptfoo YAML exports are generated views. Legacy `test*.yaml` files are
 source material, not the long-term dataset.
 
-This skill also acts as the evolution protocol for user-facing conversation
-role tests. Its job is to preserve raw evaluation assets, distill reusable
+This skill also acts as the evolution protocol for user-facing conversation role
+tests. Its job is to preserve raw evaluation assets, distill reusable
 conversation-core records, and keep role-specific failure modes traceable.
 
-For HL/RL-like work, treat the learning controller as the primary workflow. Do
-not jump directly from an observation to adding cases. First inspect the current
-learning state, decide the action, define replay, score reward, then compress
-the result.
+Use the heuristic-learning controller when promptfoo failures, human review, or
+cross-role signals should change the dataset over time. Do not jump directly
+from an observation to adding cases or prompt rules. First inspect the current
+learning state, decide the action, define replay, score reward, check
+prompt-bloat risk, then compress the result.
 
 ## Dataset Layout
 
