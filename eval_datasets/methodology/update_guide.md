@@ -5,7 +5,7 @@ tests available while building a reviewed, reusable canonical dataset.
 
 ## Import Existing Tests
 
-1. Keep the original promptfoo YAML unchanged.
+1. Keep the original evaluator files unchanged.
 2. Import it into `seeds/` with `source_path`, `source_index`, `input_var`,
    the original `vars` block, and `legacy_asserts`.
 3. Promote useful records into `canonical/` as `candidate`.
@@ -57,25 +57,29 @@ neighbor_roles: []
 
 Then add 5-10 `core_smoke` records before expanding into full coverage.
 
-## Export For Promptfoo
+## Export For Evaluators
+
+Promptfoo is the bundled default adapter, so current examples export Promptfoo
+YAML. Other evaluators should get their own projection scripts instead of
+changing canonical records to match a runner.
 
 Export only `accepted` records by default. Include `candidate` records for local
 exploration when tuning a prompt, but do not treat them as release gates.
 
-Generated exports should go under `role_eval/testsets/exports/` and should be
+Generated exports should go under `eval_datasets/exports/` and should be
 treated as build artifacts. Edit canonical records instead of editing exports.
 
 For broad legacy coverage, use the batch importer:
 
 ```bash
-python3 role_eval/testsets/scripts/batch_import_test_yaml.py \
+python3 eval_datasets/scripts/batch_import_test_yaml.py \
   . \
-  role_eval/testsets/canonical/all_existing_role_tests.v1.json \
+  eval_datasets/canonical/all_existing_role_tests.v1.json \
   --project all_existing_roles
 
-python3 role_eval/testsets/scripts/export_promptfoo_tests.py \
-  role_eval/testsets/canonical/all_existing_role_tests.v1.json \
-  role_eval/testsets/exports/all_existing_role_tests.yaml \
+python3 eval_datasets/scripts/export_promptfoo_tests.py \
+  eval_datasets/canonical/all_existing_role_tests.v1.json \
+  eval_datasets/exports/all_existing_role_tests.yaml \
   --include-status candidate
 ```
 

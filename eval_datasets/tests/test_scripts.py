@@ -6,8 +6,8 @@ import unittest
 from pathlib import Path
 
 
-ROOT = Path(__file__).resolve().parents[3]
-SCRIPTS = ROOT / "role_eval" / "testsets" / "scripts"
+ROOT = Path(__file__).resolve().parents[2]
+SCRIPTS = ROOT / "eval_datasets" / "scripts"
 
 
 def run_script(name: str, *args: str) -> subprocess.CompletedProcess[str]:
@@ -595,7 +595,7 @@ class ScriptTests(unittest.TestCase):
             write_json(
                 state,
                 {
-                    "system_id": "role_eval_heuristic_system",
+                    "system_id": "heuristic_eval_dataset_system",
                     "version": "v1",
                     "updated_at": "2026-05-19",
                     "active_loop": "hl_pilot",
@@ -634,7 +634,7 @@ class ScriptTests(unittest.TestCase):
             write_json(
                 state,
                 {
-                    "system_id": "role_eval_heuristic_system",
+                    "system_id": "heuristic_eval_dataset_system",
                     "version": "v1",
                     "updated_at": "2026-05-19",
                     "active_loop": "hl_pilot",
@@ -885,7 +885,7 @@ judge:
                             "avoid_behavior": ["poetic atmosphere without usable reply"],
                             "tags": ["exact_help"],
                             "rubric_ref": "lightweight_practical_help",
-                            "source_path": "role_eval/testsets/experiments/hl_pilot/dataset_candidate_units/unit.json",
+                            "source_path": "eval_datasets/experiments/hl_pilot/dataset_candidate_units/unit.json",
                             "review_status": "candidate",
                         }
                     ],

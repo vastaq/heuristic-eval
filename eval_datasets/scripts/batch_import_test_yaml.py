@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Batch import role-directory test*.yaml files into one canonical dataset."""
+"""Batch import promptfoo-style test*.yaml files into one canonical dataset."""
 
 from __future__ import annotations
 
@@ -34,7 +34,7 @@ def stable_prefix(root: Path, path: Path) -> str:
 def discover(root: Path) -> list[Path]:
     files = []
     for path in root.glob("**/test*.yaml"):
-        if "node_modules" in path.parts or "role_eval" in path.parts:
+        if "node_modules" in path.parts or "eval_datasets" in path.parts:
             continue
         files.append(path)
     return sorted(files)

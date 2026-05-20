@@ -3,7 +3,7 @@
 New evaluation data should be generated as dataset construction actions, not
 isolated test samples. A dataset candidate unit records why a group of
 canonical-compatible records exists, what observation triggered it, how it
-should be exported to Promptfoo tests, and where it may be compressed after
+should be exported to evaluator tests, and where it may be compressed after
 reward assessment.
 
 ## Dataset Candidate Unit Shape
@@ -11,7 +11,7 @@ reward assessment.
 Dataset candidate units live under an experiment directory:
 
 ```text
-role_eval/testsets/experiments/<experiment>/dataset_candidate_units/*.json
+eval_datasets/experiments/<experiment>/dataset_candidate_units/*.json
 ```
 
 Minimal shape:
@@ -48,7 +48,7 @@ Minimal shape:
 2. Diagnose the learning type before writing records.
 3. Specify the dataset intent in one sentence.
 4. Generate a small contrast set, usually 2-4 candidate records.
-5. Keep the unit in the experiment layer until Promptfoo export, eval, and
+5. Keep the unit in the experiment layer until evaluator export, eval, and
    reward assessment.
 6. Compress into core candidate, project extension, failure pattern, rubric
    revision, needs revision, or retired.

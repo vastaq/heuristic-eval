@@ -7,18 +7,18 @@ __pycache__/
 *.pyc
 
 # Data stays local/private by default. Keep directory placeholders only.
-role_eval/testsets/canonical/*
-!role_eval/testsets/canonical/.gitkeep
-role_eval/testsets/exports/*
-!role_eval/testsets/exports/.gitkeep
-role_eval/testsets/results/*
-!role_eval/testsets/results/.gitkeep
-role_eval/testsets/seeds/*
-!role_eval/testsets/seeds/.gitkeep
-role_eval/testsets/experiments/*
-!role_eval/testsets/experiments/.gitkeep
-role_eval/testsets/replay/outputs/*
-!role_eval/testsets/replay/outputs/.gitkeep
-role_eval/testsets/evolution/events.jsonl
-role_eval/testsets/evolution/failure_patterns/*
-!role_eval/testsets/evolution/failure_patterns/.gitkeep
+eval_datasets/canonical/*
+!eval_datasets/canonical/.gitkeep
+eval_datasets/exports/*
+!eval_datasets/exports/.gitkeep
+eval_datasets/results/*
+!eval_datasets/results/.gitkeep
+eval_datasets/seeds/*
+!eval_datasets/seeds/.gitkeep
+eval_datasets/experiments/*
+!eval_datasets/experiments/.gitkeep
+eval_datasets/replay/outputs/*
+!eval_datasets/replay/outputs/.gitkeep
+eval_datasets/evolution/events.jsonl
+eval_datasets/evolution/failure_patterns/*
+!eval_datasets/evolution/failure_patterns/.gitkeep

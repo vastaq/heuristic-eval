@@ -1,9 +1,9 @@
 # HL Replay Executor
 
-The HL replay executor is the lightweight execution layer for the role-eval
-heuristic learning loop. It is not a Promptfoo replacement in general. It only
-does the minimum work needed to turn replay batches or candidate slices into
-structured observations for reward assessment.
+The HL replay executor is the lightweight execution layer for the eval
+heuristic learning loop. It is not a full evaluator replacement in general. It
+only does the minimum work needed to turn replay batches or candidate slices
+into structured observations for reward assessment.
 
 ## Position In The Loop
 
@@ -17,16 +17,17 @@ flowchart TD
   compression --> memory["events.jsonl and learning_state"]
 ```
 
-Promptfoo test generation remains the main path for project datasets. The HL
-replay executor is a smaller optional path for cases where a focused replay only
-needs structured observations for the heuristic system.
+Evaluator export remains the main path for project datasets; Promptfoo is the
+bundled default adapter. The HL replay executor is a smaller optional path for
+cases where a focused replay only needs structured observations for the
+heuristic system.
 
 ## Replay Config
 
 Replay configs live under:
 
 ```text
-role_eval/testsets/replay/configs/*.yaml
+eval_datasets/replay/configs/*.yaml
 ```
 
 Minimal shape:
@@ -34,9 +35,9 @@ Minimal shape:
 ```yaml
 version: v1
 run_id: hl_pilot_dry_run
-input_path: role_eval/testsets/experiments/hl_pilot/conversation_core_candidate_slice.v1.json
-output_path: role_eval/testsets/replay/outputs/hl_pilot_dry_run.observations.json
-context_path: role_eval/testsets/replay/contexts/tapdoki_slowpoke_core.yaml
+input_path: eval_datasets/experiments/hl_pilot/conversation_core_candidate_slice.v1.json
+output_path: eval_datasets/replay/outputs/hl_pilot_dry_run.observations.json
+context_path: eval_datasets/replay/contexts/tapdoki_slowpoke_core.yaml
 provider:
   type: openai_compatible
   model: MiniMax-M2.7-highspeed
@@ -56,7 +57,7 @@ replay configs.
 Context configs live under:
 
 ```text
-role_eval/testsets/replay/contexts/*.yaml
+eval_datasets/replay/contexts/*.yaml
 ```
 
 Minimal shape:
@@ -86,7 +87,7 @@ file when possible.
 Observation files live under:
 
 ```text
-role_eval/testsets/replay/outputs/*.observations.json
+eval_datasets/replay/outputs/*.observations.json
 ```
 
 Minimal shape:
@@ -95,8 +96,8 @@ Minimal shape:
 {
   "version": "v1",
   "run_id": "hl_pilot_dry_run",
-  "input_path": "role_eval/testsets/experiments/hl_pilot/conversation_core_candidate_slice.v1.json",
-  "context_path": "role_eval/testsets/replay/contexts/tapdoki_slowpoke_core.yaml",
+  "input_path": "eval_datasets/experiments/hl_pilot/conversation_core_candidate_slice.v1.json",
+  "context_path": "eval_datasets/replay/contexts/tapdoki_slowpoke_core.yaml",
   "dry_run": true,
   "records": [
     {

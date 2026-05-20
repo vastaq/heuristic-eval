@@ -2,17 +2,17 @@
 
 Reward assessment converts replay observations into a conservative system-level
 decision. It does not judge whether one output is beautiful. It judges whether a
-mutation improved the role-eval heuristic system.
+mutation improved the heuristic eval system.
 
 ## Input
 
 Reward assessment reads observation files produced from project test runs. The
-main path is Promptfoo test generation plus result conversion; the lightweight
-HL replay executor can also produce the same observation shape for small focused
-replays:
+main path is evaluator export plus result conversion, with Promptfoo as the
+bundled default adapter. The lightweight HL replay executor can also produce the
+same observation shape for small focused replays:
 
 ```text
-role_eval/testsets/replay/outputs/*.observations.json
+eval_datasets/replay/outputs/*.observations.json
 ```
 
 ## Output
@@ -20,7 +20,7 @@ role_eval/testsets/replay/outputs/*.observations.json
 Reward assessments should live under the experiment that owns the mutation:
 
 ```text
-role_eval/testsets/experiments/<experiment>/reward_assessments/*.reward.json
+eval_datasets/experiments/<experiment>/reward_assessments/*.reward.json
 ```
 
 Minimal shape:
@@ -29,7 +29,7 @@ Minimal shape:
 {
   "version": "v1",
   "mutation_id": "tapdoki_dreamer_exact_help.v1",
-  "observation_path": "role_eval/testsets/replay/outputs/example.observations.json",
+  "observation_path": "eval_datasets/replay/outputs/example.observations.json",
 	  "scores": {
 	    "user_facing_relevance": 3,
 	    "diagnostic_clarity": 4,

@@ -1,10 +1,10 @@
 {
-  "name": "role-eval-dataset",
+  "name": "heuristic-eval-dataset",
   "private": true,
-  "description": "Shared protocol and tooling for promptfoo-based role evaluation datasets.",
+  "description": "Shared protocol and tooling for evaluator-agnostic heuristic evaluation datasets.",
   "scripts": {
-    "test": "python3 -m unittest role_eval.testsets.tests.test_scripts",
-    "py-compile": "python3 -m py_compile role_eval/testsets/scripts/*.py"
+    "test": "python3 -m unittest eval_datasets.tests.test_scripts",
+    "py-compile": "python3 -m py_compile eval_datasets/scripts/*.py"
   },
   "devDependencies": {
     "promptfoo": "^0.120.25",

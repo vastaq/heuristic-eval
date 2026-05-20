@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Select a small traceable review batch for role-eval HL pilots."""
+"""Select a small traceable review batch for heuristic eval HL pilots."""
 
 from __future__ import annotations
 

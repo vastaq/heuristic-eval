@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate role-eval heuristic learning state snapshots."""
+"""Validate heuristic eval learning state snapshots."""
 
 from __future__ import annotations
 

@@ -1,8 +1,9 @@
 # Role Evaluation Testset Schema
 
 This schema is the canonical source format for reusable character evaluation
-testsets. Existing promptfoo YAML files can be imported into this shape, reviewed,
-updated, and exported back to promptfoo without replacing the original tests.
+testsets. Existing evaluator files, including Promptfoo YAML, can be imported
+into this shape, reviewed, updated, and exported back to runner-specific views
+without replacing the original tests.
 
 ## Dataset Document
 
@@ -60,7 +61,7 @@ updated, and exported back to promptfoo without replacing the original tests.
 | `id` | string | Stable unique id. Do not reuse after retiring a sample. |
 | `layer` | enum | Test layer from `scenario_taxonomy.md`. |
 | `role` | string | Target role key. |
-| `character_context` | string | Prompt or role context path used by promptfoo. |
+| `character_context` | string | Prompt or role context path used by the evaluator. |
 | `scene_type` | string | Scenario type from the taxonomy or project extension. |
 | `difficulty` | enum | `easy`, `medium`, or `hard`. |
 | `input` | string | User message sent to the role. |
@@ -78,8 +79,8 @@ updated, and exported back to promptfoo without replacing the original tests.
 | `source_index` | Original index in the imported file. |
 | `source_id` | Original metadata id, if present. |
 | `source_file` | Source YAML file when generated from a batch import. |
-| `input_var` | Original promptfoo input variable name, such as `question` or `user_input`. |
-| `vars` | Original promptfoo `vars` block, preserved so exports keep extra context. |
+| `input_var` | Original evaluator input variable name. For Promptfoo, this is often `question` or `user_input`. |
+| `vars` | Original Promptfoo `vars` block, preserved so exports keep extra context. |
 | `conversation_id` | Multi-turn or context-drift group id. |
 | `turn` | Turn number inside a conversation. |
 | `contrast_group` | Group id for paired contrast tests. |
@@ -87,14 +88,17 @@ updated, and exported back to promptfoo without replacing the original tests.
 | `expected_length` | `one_line`, `short`, or `medium`. |
 | `risk_level` | `low`, `medium`, or `high`. |
 | `source` | `human_seed`, `synthetic`, `model_assisted`, `regression`, or `legacy_import`. |
-| `legacy_asserts` | Original promptfoo assertions that must survive export. |
+| `legacy_asserts` | Original evaluator assertions that must survive export. |
 | `revision` | Integer updated when the sample changes materially. |
 | `updated_at` | Date of the latest sample update. |
 | `notes` | Human rationale for why this sample exists. |
 
-## Promptfoo Projection
+## Evaluator Projection
 
-Canonical records are exported to promptfoo tests like this:
+Promptfoo is the bundled default projection. Other evaluators should use their
+own projection section and scripts.
+
+Canonical records are exported to Promptfoo tests like this:
 
 ```yaml
 - vars:

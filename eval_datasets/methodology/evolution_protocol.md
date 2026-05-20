@@ -1,6 +1,6 @@
 # Testset Evolution Protocol
 
-This protocol treats `role_eval/testsets` as an evolving memory system for
+This protocol treats `eval_datasets` as an evolving memory system for
 user-facing conversation roles. Raw evaluation assets are preserved for
 traceability, while a smaller reviewed core is continuously distilled from
 legacy tests, eval failures, prompt work, and human feedback.
@@ -12,7 +12,7 @@ every record into the same quality tier.
 
 | Layer | Purpose | Typical contents |
 | --- | --- | --- |
-| Raw Asset Layer | Preserve original material without cleanup pressure. | Legacy promptfoo YAML, old canonical snapshots, eval result files, human notes. |
+| Raw Asset Layer | Preserve original material without cleanup pressure. | Legacy evaluator files, Promptfoo YAML, old canonical snapshots, eval result files, human notes. |
 | Intake Layer | Normalize raw material into traceable candidates. | Canonical records with `source_path`, `source_index`, `legacy_asserts`, `input_var`, and `vars`. |
 | Core Layer | Keep a small, high-signal balanced conversation core. | Cross-project tests for emotional reception, lightweight help, identity boundary, context carryover, and natural style. |
 | Project Extension Layer | Preserve role or project-specific behavior. | Tapdoki, Slowpoke, Ultraman, and other project-specific failure cases. |
@@ -42,7 +42,7 @@ Use this workflow when reusing previous evaluation assets:
 
 1. Preserve the raw source unchanged.
 2. Normalize into canonical shape only if it has reusable signal.
-3. Preserve source traceability and promptfoo compatibility fields.
+3. Preserve source traceability and evaluator compatibility fields.
 4. Map the sample to conversation-core dimensions or project-specific failure
    modes.
 5. Check for semantic duplication before adding another record.

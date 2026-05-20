@@ -7,7 +7,7 @@ records compact while preserving traceability for future skill runs.
 Recommended path:
 
 ```text
-role_eval/testsets/evolution/events.jsonl
+eval_datasets/evolution/events.jsonl
 ```
 
 The path may not exist until the first event is written. Do not backfill every
@@ -23,8 +23,8 @@ Each line is one JSON object:
   "timestamp": "2026-05-19T15:30:00+08:00",
   "event_type": "case_added",
   "record_id": "conversation_core_low_energy_no_advice_001",
-  "dataset_path": "role_eval/testsets/canonical/conversation_core.v1.json",
-  "actor": "role-testset-database-skill",
+  "dataset_path": "eval_datasets/canonical/conversation_core.v1.json",
+  "actor": "heuristic-eval-dataset-skill",
   "source": {
     "type": "legacy_asset",
     "path": "tapdoki/test.roles_ordinary.yaml",

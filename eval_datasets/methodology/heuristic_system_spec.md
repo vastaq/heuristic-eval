@@ -1,6 +1,6 @@
 # Role-Eval Heuristic System Spec
 
-This document defines the role-eval system as a heuristic learning system, not
+This document defines the heuristic eval system as a heuristic learning system, not
 only as a testset database. The maintained object is the whole evaluation
 apparatus: records, rubrics, failure models, replay batches, event logs, skills,
 and compression decisions.
@@ -136,10 +136,11 @@ Replay must match the claim:
 
 If replay is unavailable, keep the result in experiment state.
 
-Promptfoo test generation is the primary execution path for project datasets.
-The lightweight HL replay executor is an optional project-local runner for small
-structured observation loops when full Promptfoo compatibility is unnecessary.
-See `role_eval/testsets/methodology/hl_replay_executor.md`.
+Evaluator export is the primary execution path for project datasets; Promptfoo
+is the bundled default adapter. The lightweight HL replay executor is an
+optional project-local runner for small structured observation loops when full
+evaluator compatibility is unnecessary.
+See `eval_datasets/methodology/hl_replay_executor.md`.
 
 ## Compression Policy
 
@@ -162,16 +163,16 @@ New tests should start as dataset candidate units when they are generated from a
 feedback signal. A candidate unit preserves the trigger, diagnosis, dataset
 intent, candidate destination, reward expectation, replay requirements, and a
 small set of canonical-compatible records. See
-`role_eval/testsets/methodology/hl_dataset_generation.md`.
+`eval_datasets/methodology/hl_dataset_generation.md`.
 
 After replay, create a reward assessment before compressing the unit into core
 candidate records, project extension records, failure patterns, rubric revision,
 needs revision, or retirement. See
-`role_eval/testsets/methodology/hl_reward_assessment.md`.
+`eval_datasets/methodology/hl_reward_assessment.md`.
 
 ## Controller Checklist
 
-Before each role-eval update:
+Before each heuristic eval update:
 
 1. What is the observation?
 2. What state does it affect?

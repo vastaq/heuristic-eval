@@ -9,7 +9,7 @@ assertions, scenario generators, and evaluation strategies.
 | Module type | Examples | Default destination |
 | --- | --- | --- |
 | `taxonomy_experiment` | New dimensions, scene types, tag namespaces. | Candidate reports or methodology drafts. |
-| `rubric_experiment` | New judge wording, scoring thresholds, role-specific rubric modules. | Candidate-only promptfoo exports. |
+| `rubric_experiment` | New judge wording, scoring thresholds, role-specific rubric modules. | Candidate-only evaluator exports. |
 | `failure_pack_experiment` | A set of cases targeting a generic or role-specific failure pattern. | Project extension or experiment dataset. |
 | `hard_assertion_experiment` | Length checks, no-action-marker checks, no-prompt-leak checks. | Small accepted-bank trial before gate use. |
 | `oracle_strategy_experiment` | Hybrid judge plus hard checks, repeated runs, alternate judge providers. | Eval run manifest or experiment notes. |

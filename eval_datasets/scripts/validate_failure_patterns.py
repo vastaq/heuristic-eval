@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate role-eval failure pattern JSON files."""
+"""Validate heuristic eval failure pattern JSON files."""
 
 from __future__ import annotations
 
