@@ -74,13 +74,17 @@ It is not where dataset records live. The actual dataset system lives under
 skill location, copy or symlink `skills/role-eval-dataset/SKILL.md` into that
 runtime's expected path.
 
-## Minimal Skill Installation
+## Installation
 
-The skill is plain Markdown. The minimal installation is to copy or symlink the
-skill folder into the skill directory used by your agent runtime.
+There are two ways to use this repository.
+
+### Agent Installation
+
+Use this when you want an AI coding agent to understand the workflow. Install
+only the skill folder into the skill directory used by your agent runtime.
 
 ```bash
-# Generic local install into a project-level skills folder
+# Generic project-level skill install
 mkdir -p .agents/skills
 cp -R skills/role-eval-dataset .agents/skills/
 ```
@@ -92,8 +96,25 @@ skill directory and keep the same folder shape:
 <tool-skill-root>/role-eval-dataset/SKILL.md
 ```
 
-The scripts and methodology do not require installing the skill. They can be run
-directly from this repository.
+The skill is plain Markdown. It gives the agent operating rules for role eval
+dataset work, but it does not install data or run scripts by itself.
+
+### Non-AI / Script Usage
+
+Use this when you want the methodology and command-line tools without an agent.
+Clone the repository, install Node dependencies for YAML/promptfoo-related
+helpers, then run the Python scripts directly.
+
+```bash
+git clone https://github.com/vastaq/role-eval-dataset.git
+cd role-eval-dataset
+npm install
+python3 -m py_compile role_eval/testsets/scripts/*.py
+python3 -m unittest role_eval.testsets.tests.test_scripts
+```
+
+After that, keep your local/private data in the ignored `role_eval/testsets/*`
+data directories and use the scripts from `role_eval/testsets/scripts/`.
 
 ## Basic Workflow
 
