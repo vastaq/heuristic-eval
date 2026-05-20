@@ -16,7 +16,7 @@ inside an acceptable experience band while avoiding prompt bloat and overfitting
 
 It includes:
 
-- `.cursor/skills/role-eval-dataset/SKILL.md`: the Cursor agent workflow skill.
+- `skills/role-eval-dataset/SKILL.md`: an agent-readable workflow skill.
 - `role_eval/testsets/methodology/`: schema, taxonomy, heuristic-learning, and
   review guidance.
 - `role_eval/testsets/scripts/`: generic import, export, audit, replay, reward,
@@ -49,8 +49,8 @@ and promotion rules.
 ## Repository Layout
 
 ```text
-.cursor/skills/role-eval-dataset/
-  SKILL.md                 # Cursor skill for agent-assisted dataset work
+skills/role-eval-dataset/
+  SKILL.md                 # Agent-readable workflow skill
 
 role_eval/testsets/
   methodology/             # Shared schema, taxonomy, HL, and review guidance
@@ -64,17 +64,16 @@ role_eval/testsets/
   evolution/               # Event logs and failure patterns
 ```
 
-### About `.cursor/`
+### About `skills/`
 
-The `.cursor/` directory is included so Cursor can discover the skill directly
-when this repository is opened as a project.
+The `skills/` directory is intentionally tool-agnostic. It stores the workflow
+instructions as plain Markdown so Cursor, Codex, Claude, or a human maintainer
+can read or adapt them.
 
 It is not where dataset records live. The actual dataset system lives under
-`role_eval/testsets/`.
-
-If you are not using Cursor, you can still use all methodology docs and scripts
-normally. The skill file is plain Markdown and can be read or adapted by other
-agents.
+`role_eval/testsets/`. If a specific editor or agent runtime needs a different
+skill location, copy or symlink `skills/role-eval-dataset/SKILL.md` into that
+runtime's expected path.
 
 ## Basic Workflow
 
