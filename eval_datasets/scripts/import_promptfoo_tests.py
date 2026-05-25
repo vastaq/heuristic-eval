@@ -12,7 +12,8 @@ from typing import Any
 from yaml_bridge import parse_yaml
 
 
-INPUT_KEYS = ("question", "user_input", "input", "message")
+INPUT_KEYS = ("question", "user_input", "input", "message", "text")
+SCENE_KEYS = ("scene_type", "scene", "dimension", "category", "task_type")
 
 
 def input_key(vars_block: dict[str, Any]) -> str:
@@ -23,7 +24,7 @@ def input_key(vars_block: dict[str, Any]) -> str:
 
 
 def first_input(vars_block: dict[str, Any]) -> str:
-    for key in ("question", "user_input", "input", "message"):
+    for key in INPUT_KEYS:
         value = vars_block.get(key)
         if isinstance(value, str):
             return value
@@ -35,6 +36,23 @@ def target_behavior(assertions: list[dict[str, Any]]) -> list[str]:
         if assertion.get("type") == "llm-rubric" and assertion.get("value"):
             return [str(assertion["value"])]
     return ["Imported legacy test; review target behavior before accepting."]
+
+
+def first_metadata(metadata: dict[str, Any], keys: tuple[str, ...], default: str) -> str:
+    for key in keys:
+        value = metadata.get(key)
+        if isinstance(value, str) and value:
+            return value
+    return default
+
+
+def tags_from_metadata(metadata: dict[str, Any]) -> list[str]:
+    tags = metadata.get("tags", [])
+    if isinstance(tags, list):
+        return [str(tag) for tag in tags]
+    if isinstance(tags, str):
+        return [tags]
+    return []
 
 
 def records_from_promptfoo(source_path: Path, role: str) -> list[dict[str, Any]]:
@@ -64,7 +82,7 @@ def records_from_promptfoo(source_path: Path, role: str) -> list[dict[str, Any]]
             "layer": metadata.get("layer", "core_smoke"),
             "role": record_role,
             "character_context": vars_block.get("character_context", ""),
-            "scene_type": metadata.get("scene_type", "legacy_import"),
+            "scene_type": first_metadata(metadata, SCENE_KEYS, "legacy_import"),
             "difficulty": metadata.get("difficulty", "medium"),
             "input": first_input(vars_block),
             "input_var": selected_input_key,
@@ -73,8 +91,8 @@ def records_from_promptfoo(source_path: Path, role: str) -> list[dict[str, Any]]
             "avoid_behavior": [
                 "Imported legacy test; review avoid behavior before accepting."
             ],
-            "tags": metadata.get("tags", []),
-            "rubric_ref": metadata.get("rubric_ref", "legacy_import"),
+            "tags": tags_from_metadata(metadata),
+            "rubric_ref": first_metadata(metadata, ("rubric_ref", "rubric", "dimension"), "legacy_import"),
             "source_path": str(source_path),
             "source_index": index,
             "source_id": metadata.get("id", ""),
@@ -85,6 +103,8 @@ def records_from_promptfoo(source_path: Path, role: str) -> list[dict[str, Any]]
         }
         if conversation_id:
             record["conversation_id"] = conversation_id
+        if metadata.get("dimension") and "dimension" not in record["tags"]:
+            record["tags"].append(str(metadata["dimension"]))
         if metadata.get("turn"):
             record["turn"] = metadata["turn"]
         elif conversation_id:

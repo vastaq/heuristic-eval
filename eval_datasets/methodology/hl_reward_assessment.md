@@ -38,8 +38,11 @@ Minimal shape:
 	    "noise_reduction": 3,
 	    "compression_value": 2,
 	    "naturalness_preservation": 3,
+	    "abstraction_level": 3,
+	    "rubric_shape_balance": 3,
 	    "prompt_bloat_risk": 1,
-	    "overfit_risk": 1
+	    "overfit_risk": 1,
+	    "human_goal_alignment": 3
 	  },
 	  "acceptable_band": {
 	    "identity": "stable",
@@ -76,12 +79,21 @@ Minimal shape:
 Pass rate is evidence, not the reward. Promotion still requires replay and human
 review.
 
+Human signals can change reward interpretation. If the user says a passing
+answer feels stiff, increase prompt-bloat concern. If the user says remaining
+failures are acceptable, prefer `accept_variance` or `stop_tuning` over prompt
+edits.
+
 ## Bloat And Overfit Checks
 
 Reward assessment must explicitly check whether a proposed mutation makes the
 role prompt more rigid. Penalize mutations that:
 
 - Add narrow wording rules for one case.
+- Add several `if`/`when` exceptions without naming the shared principle they
+  preserve.
+- Improve pass rate by satisfying a dominant eval shape, such as always adding a
+  concrete action, while weakening the role's natural response range.
 - Force role flavor into simple practical replies.
 - Improve pass rate while lowering naturalness.
 - Depend on one judge's style preference.
@@ -90,3 +102,19 @@ role prompt more rigid. Penalize mutations that:
 If the current prompt is already in the acceptable band, prefer `accept_variance`
 or `stop_tuning` over more prompt edits. A small number of low-severity failures
 is healthier than a prompt that passes more tests by becoming stiff.
+
+Reward useful compression. A prompt mutation should score higher only when it
+turns repeated local failures into a clearer role invariant, decision order, or
+rubric distinction. If the mutation merely adds local exceptions, treat the
+pass-rate gain as overfit pressure rather than durable learning.
+
+Before accepting a prompt mutation, check rubric shape balance. If the eval
+mostly rewards one shape, such as actions or exact phrases, the next mutation
+should usually revise or supplement the eval instead of making the prompt better
+at that single shape.
+
+For a newly generated, imported, or rebalanced eval pack, require a dataset
+traction audit before treating pass rate as prompt-tuning pressure. If the audit
+recommends `revise_or_supplement_eval_first`, the reward decision should usually
+be `revise_rubric`, `needs_revision`, `accept_variance`, or `stop_tuning`, not a
+prompt mutation.

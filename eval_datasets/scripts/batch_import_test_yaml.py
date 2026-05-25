@@ -40,6 +40,12 @@ def discover(root: Path) -> list[Path]:
     return sorted(files)
 
 
+def allowed_role(role: str, include: set[str], exclude: set[str]) -> bool:
+    if include and role not in include:
+        return False
+    return role not in exclude
+
+
 def dedupe_ids(records: list[dict[str, Any]]) -> None:
     seen: set[str] = set()
     for record in records:
@@ -53,10 +59,17 @@ def dedupe_ids(records: list[dict[str, Any]]) -> None:
         seen.add(candidate)
 
 
-def batch_import(root: Path, output_path: Path, project: str) -> int:
+def batch_import(
+    root: Path,
+    output_path: Path,
+    project: str,
+    include_roles: set[str],
+    exclude_roles: set[str],
+) -> int:
     files = discover(root)
     records: list[dict[str, Any]] = []
     skipped: list[dict[str, str]] = []
+    filtered: list[dict[str, str]] = []
 
     for path in files:
         role = role_from_path(root, path)
@@ -68,6 +81,15 @@ def batch_import(root: Path, output_path: Path, project: str) -> int:
 
         prefix = stable_prefix(root, path)
         for record in imported:
+            record_role = str(record.get("role", role))
+            if not allowed_role(record_role, include_roles, exclude_roles):
+                filtered.append(
+                    {
+                        "path": str(path.relative_to(root)),
+                        "reason": f"record role filtered: {record_role}",
+                    }
+                )
+                continue
             record["id"] = f"{prefix}_{record['id']}"
             record["source_path"] = str(path.relative_to(root))
             record["source_file"] = str(path.relative_to(root))
@@ -82,6 +104,7 @@ def batch_import(root: Path, output_path: Path, project: str) -> int:
         "updated_at": date.today().isoformat(),
         "records": records,
         "skipped": skipped,
+        "filtered": filtered,
     }
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
@@ -91,6 +114,8 @@ def batch_import(root: Path, output_path: Path, project: str) -> int:
         print(f"Skipped {len(skipped)} files:")
         for item in skipped:
             print(f"- {item['path']}: {item['reason']}")
+    if filtered:
+        print(f"Filtered {len(filtered)} files or records.")
     return 0 if not skipped else 1
 
 
@@ -99,8 +124,18 @@ def main() -> None:
     parser.add_argument("root", type=Path)
     parser.add_argument("output", type=Path)
     parser.add_argument("--project", default="all_existing_roles")
+    parser.add_argument("--include-role", action="append", default=[])
+    parser.add_argument("--exclude-role", action="append", default=[])
     args = parser.parse_args()
-    raise SystemExit(batch_import(args.root.resolve(), args.output, args.project))
+    raise SystemExit(
+        batch_import(
+            args.root.resolve(),
+            args.output,
+            args.project,
+            set(args.include_role),
+            set(args.exclude_role),
+        )
+    )
 
 
 if __name__ == "__main__":

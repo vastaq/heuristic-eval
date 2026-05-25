@@ -36,12 +36,15 @@ legacy asset appears useful:
 | --- | --- | --- |
 | `prompt_issue` | The role response is bad and the case/rubric are fair. | Tune prompt and consider adding a regression case. |
 | `rubric_issue` | The judge rewards or punishes the wrong behavior. | Revise rubric wording or mark the record `needs_revision`. |
+| `eval_reward_shape_bias` | The eval repeatedly rewards one output shape, such as concrete actions, exact phrases, lists, or role keywords. | Rebalance buckets or revise rubrics before prompt tuning. |
+| `dataset_traction_audit_missing` | A new or suspicious eval pack is being used to tune a prompt before checking reward-shape pressure and countercase coverage. | Run a traction audit and block prompt mutation if the measuring stick is biased. |
 | `case_issue` | The input, target behavior, or avoid behavior is unclear. | Revise, split, or retire the record. |
 | `taxonomy_gap` | The failure does not fit existing dimensions. | Start a taxonomy experiment or add a core scene type after evidence. |
 | `failure_model_gap` | A repeated role-specific failure has no named model. | Add or update a role/project failure pattern. |
 | `noisy_eval` | The evidence is unstable, judge-dependent, or too prompt-specific. | Keep in experiment layer; do not promote. |
 | `acceptable_variance` | The output is imperfect but still inside the acceptable role experience band. | Accept variance, record the rationale, and do not tune. |
 | `overfit_pressure` | Fixing the case would require a narrow rule that makes simple conversation rigid. | Revise or retire the case; only tune after repeated severe evidence. |
+| `abstraction_drift` | Several local fixes point to a missing or unclear higher-level role principle. | Revise the role invariant, decision order, rubric, or failure model before adding more prompt rules. |
 
 ## Reward Signals
 
@@ -67,12 +70,22 @@ Before changing a prompt because of a failed case, ask:
 3. Is the case fair, natural, and worth preserving?
 4. Would the fix add a narrow rule, keyword requirement, or role-flavor
    overperformance?
-5. Would revising the rubric, accepting variance, or retiring the case produce a
+5. Are several fixes trying to say the same higher-level rule in local `if`
+   form?
+6. Is the eval rewarding one output shape too often, such as always requiring a
+   concrete action when presence or restraint may be better?
+7. Has a dataset traction audit been run for this eval pack if it is new,
+   imported, rebalanced, or suspected of bias?
+8. Would revising the rubric, accepting variance, or retiring the case produce a
    healthier system?
 
 Prefer `accept_variance`, `revise_rubric`, `needs_revision`, or `retired` when a
 case pressures the prompt toward stiffness. Prompt changes should pay for their
 complexity by protecting a meaningful, reusable behavior.
+
+If several failures share a root cause, do not patch them separately. Compress
+them into one role principle, decision order, or named failure pattern, then
+replay a small batch to check that the principle handles the cases naturally.
 
 ## Acceptable Band
 

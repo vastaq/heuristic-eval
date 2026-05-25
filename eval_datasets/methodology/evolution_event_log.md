@@ -53,6 +53,7 @@ Each line is one JSON object:
 | `case_marked_needs_revision` | A useful idea is kept but not trusted as-is. |
 | `rubric_revised` | A rubric changes because it was too broad, too narrow, or rewarded the wrong behavior. |
 | `failure_pattern_added` | A generic or role-specific failure mode is created or updated. |
+| `human_signal_captured` | A user judgment, preference, stop rule, or strategy note becomes structured memory. |
 | `experiment_started` | A new module starts in the experiment layer. |
 | `experiment_promoted` | An experiment proves value and enters core, project extension, or gate. |
 | `experiment_retired` | An experiment is dropped due to noise, low reuse, or overfitting. |
@@ -62,6 +63,8 @@ Each line is one JSON object:
 Use one or more evidence kinds:
 
 - `human_review`: A reviewer inspected role fit, realism, and rubric fairness.
+- `human_signal`: A lightweight user judgment, preference, stop rule, or
+  strategy note was captured.
 - `eval_failure`: A model output failed in a meaningful way.
 - `repeated_regression`: The same failure appeared across runs, prompts, or roles.
 - `legacy_assertion`: An old hard assertion still protects behavior.

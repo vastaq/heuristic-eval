@@ -258,6 +258,44 @@ class ScriptTests(unittest.TestCase):
             self.assertEqual(len(payload["records"]), 2)
             self.assertEqual({record["role"] for record in payload["records"]}, {"role_a", "role_b"})
 
+    def test_batch_import_filters_roles_and_maps_scene_metadata(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            (root / "star").mkdir()
+            (root / "vampire").mkdir()
+            for role in ("star", "vampire"):
+                (root / role / "test.yaml").write_text(
+                    f"""
+- vars:
+    question: "hello"
+  metadata:
+    role: {role}
+    scene: greeting
+  assert:
+    - type: llm-rubric
+      value: "answer naturally"
+""".strip(),
+                    encoding="utf-8",
+                )
+            output = root / "filtered.json"
+
+            result = run_script(
+                "batch_import_test_yaml.py",
+                str(root),
+                str(output),
+                "--project",
+                "demo",
+                "--include-role",
+                "star",
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            payload = json.loads(output.read_text(encoding="utf-8"))
+            self.assertEqual(len(payload["records"]), 1)
+            self.assertEqual(payload["records"][0]["role"], "star")
+            self.assertEqual(payload["records"][0]["scene_type"], "greeting")
+            self.assertEqual(len(payload["filtered"]), 1)
+
     def test_select_hl_pilot_candidates_filters_and_caps_records(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             dataset = Path(tmp) / "dataset.json"
@@ -653,6 +691,149 @@ class ScriptTests(unittest.TestCase):
 
             self.assertEqual(result.returncode, 1)
             self.assertIn("reward_weights.diagnostic_clarity", result.stdout)
+
+    def test_import_legacy_learning_bootstraps_manifest_and_state(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            legacy = root / "legacy"
+            output_dir = root / "bootstrap"
+            (legacy / "role_eval" / "testsets" / "canonical").mkdir(parents=True)
+            (legacy / "role_eval" / "testsets" / "results" / "full30").mkdir(parents=True)
+            (legacy / "tapdoki" / "experiments").mkdir(parents=True)
+            write_json(
+                legacy / "role_eval" / "testsets" / "canonical" / "old_tests.json",
+                {"records": []},
+            )
+            write_json(
+                legacy / "role_eval" / "testsets" / "results" / "full30" / "results.json",
+                {"results": []},
+            )
+            (legacy / "tapdoki" / "experiments" / "eval_summary.md").write_text(
+                "# Summary\nRepeated stiffness under simple requests.\n",
+                encoding="utf-8",
+            )
+
+            result = run_script(
+                "import_legacy_learning.py",
+                str(legacy),
+                "--output-dir",
+                str(output_dir),
+                "--project",
+                "demo",
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            manifest = json.loads((output_dir / "manifest.json").read_text(encoding="utf-8"))
+            state = json.loads((output_dir / "learning_state.v1.json").read_text(encoding="utf-8"))
+            decision = json.loads((output_dir / "decision.json").read_text(encoding="utf-8"))
+            self.assertEqual(manifest["import_type"], "legacy_learning_bootstrap")
+            self.assertTrue(manifest["rules"]["legacy_import_is_not_accepted"])
+            self.assertEqual(manifest["asset_counts"]["legacy_canonical_json"], 1)
+            self.assertEqual(manifest["asset_counts"]["legacy_eval_result"], 1)
+            self.assertEqual(manifest["asset_counts"]["legacy_summary"], 1)
+            self.assertEqual(state["active_loop"], "legacy_import_bootstrap")
+            self.assertIn("mutate_prompt_from_legacy_import_only", state["blocked_actions"])
+            self.assertEqual(decision["primary_outcome"], "needs_human_review")
+
+    def test_normalize_legacy_canonical_adds_traceability_and_candidates(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            source = Path(tmp) / "character_eval_dataset.v1.json"
+            output = Path(tmp) / "candidate.json"
+            write_json(
+                source,
+                {
+                    "version": "v1",
+                    "project": "tapdoki",
+                    "dataset_type": "character_prompt_eval",
+                    "records": [
+                        {
+                            "id": "star_001",
+                            "role": "star",
+                            "review_status": "accepted",
+                            "input": "hello",
+                        }
+                    ],
+                },
+            )
+
+            result = run_script(
+                "normalize_legacy_canonical.py",
+                str(source),
+                str(output),
+                "--project",
+                "demo",
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            payload = json.loads(output.read_text(encoding="utf-8"))
+            record = payload["records"][0]
+            self.assertEqual(record["review_status"], "candidate")
+            self.assertEqual(record["source_path"], str(source))
+            self.assertEqual(record["source_index"], 0)
+            self.assertEqual(record["source_id"], "star_001")
+            self.assertTrue(payload["import_boundary"]["legacy_import_is_not_accepted"])
+
+    def test_normalize_promptfoo_results_and_failure_summary(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            result_path = root / "promptfoo.json"
+            summary_path = root / "failures.json"
+            output = root / "observations.json"
+            write_json(
+                result_path,
+                {
+                    "results": {
+                        "results": [
+                            {
+                                "success": True,
+                                "score": 0.9,
+                                "vars": {"question": "hi"},
+                                "metadata": {
+                                    "id": "case_001",
+                                    "role": "star",
+                                    "scene_type": "greeting",
+                                    "prompt_variant": "compact",
+                                },
+                                "response": {"output": "hello"},
+                                "gradingResult": {"reason": "pass"},
+                            }
+                        ]
+                    }
+                },
+            )
+            write_json(
+                summary_path,
+                [
+                    {
+                        "id": "case_002",
+                        "role": "star",
+                        "scene": "message_reply",
+                        "question": "reply",
+                        "output": "bad",
+                        "reason": "too stiff",
+                    }
+                ],
+            )
+
+            result = run_script(
+                "normalize_promptfoo_results.py",
+                str(result_path),
+                str(summary_path),
+                "--output",
+                str(output),
+                "--project",
+                "demo",
+                "--run-id",
+                "run_001",
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            payload = json.loads(output.read_text(encoding="utf-8"))
+            self.assertEqual(payload["summary"]["total"], 2)
+            self.assertEqual(payload["summary"]["successes"], 1)
+            self.assertEqual(payload["summary"]["failures"], 1)
+            self.assertEqual(payload["observations"][0]["record_id"], "case_001")
+            self.assertEqual(payload["observations"][1]["scene_type"], "message_reply")
 
     def test_run_hl_replay_dry_run_writes_observations(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
