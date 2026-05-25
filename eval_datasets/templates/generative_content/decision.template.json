@@ -3,8 +3,8 @@
   "run_id": "project_run_YYYYMMDD_HHMMSS",
   "profile": "generative_content",
   "adapter": "batch_story_generation",
-  "decision_type": "accept_direction",
-  "accepted_direction": true,
+  "decision_type": "needs_decision",
+  "accepted_direction": null,
   "primary_reason": "Summarize the main evidence in one sentence.",
   "score_interpretation": {
     "primary_quality_signal": "human_review_or_llm_review",

@@ -292,6 +292,7 @@ class ScriptTests(unittest.TestCase):
             self.assertEqual(manifest["run_id"], "demo_run")
             self.assertEqual(manifest["project"], "demo")
             self.assertEqual(manifest["source_artifact_root"], "local/out")
+            self.assertEqual(manifest["source_files"], {"summary": "local/out/summary.json"})
             self.assertEqual(manifest["source_files"]["summary"], "local/out/summary.json")
             self.assertEqual(manifest["controlled_variables"], ["season"])
             self.assertEqual(manifest["content_units"], ["forest"])
@@ -299,7 +300,52 @@ class ScriptTests(unittest.TestCase):
             self.assertEqual(manifest["success_count"], 3)
             self.assertEqual(manifest["failure_count"], 1)
             self.assertEqual(decision["decision_id"], "demo_run_decision")
+            self.assertEqual(decision["decision_type"], "needs_decision")
+            self.assertIsNone(decision["accepted_direction"])
             self.assertEqual((output / "human_signals.jsonl").read_text(encoding="utf-8"), "")
+
+    def test_init_eval_run_marks_accept_direction_when_requested(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp) / "run"
+
+            result = run_script(
+                "init_eval_run.py",
+                "--run-id",
+                "demo_run",
+                "--project",
+                "demo",
+                "--output-dir",
+                str(output),
+                "--decision-type",
+                "accept_direction",
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            decision = json.loads((output / "decision.json").read_text(encoding="utf-8"))
+            self.assertEqual(decision["decision_type"], "accept_direction")
+            self.assertIs(decision["accepted_direction"], True)
+
+    def test_init_eval_run_does_not_accept_non_accept_decisions_by_default(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp) / "run"
+
+            result = run_script(
+                "init_eval_run.py",
+                "--run-id",
+                "demo_run",
+                "--project",
+                "demo",
+                "--output-dir",
+                str(output),
+                "--decision-type",
+                "revise_prompt_boundary",
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            decision = json.loads((output / "decision.json").read_text(encoding="utf-8"))
+            manifest = json.loads((output / "manifest.json").read_text(encoding="utf-8"))
+            self.assertIsNone(decision["accepted_direction"])
+            self.assertEqual(manifest["source_files"], {})
 
     def test_batch_import_filters_roles_and_maps_scene_metadata(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

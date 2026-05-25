@@ -18,8 +18,6 @@ eval_datasets/canonical/*
 !eval_datasets/canonical/.gitkeep
 eval_datasets/exports/*
 !eval_datasets/exports/.gitkeep
-eval_datasets/results/*
-!eval_datasets/results/.gitkeep
 eval_datasets/runs/*
 !eval_datasets/runs/.gitkeep
 eval_datasets/seeds/*

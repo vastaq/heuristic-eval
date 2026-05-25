@@ -222,6 +222,9 @@ python3 eval_datasets/scripts/init_eval_run.py \
   --source-file summary=path/to/project/local/output/summary.json
 ```
 
+By default, this writes under `eval_datasets/runs/`, which is ignored by Git so
+project-specific evidence stays local unless you choose another `--output-dir`.
+
 ## Optional Agent Skill
 
 For agent runtimes that support skills, install the skill folder as an entrypoint
@@ -462,7 +465,6 @@ The `.gitignore` keeps these data directories empty by default:
 
 - `eval_datasets/canonical/`
 - `eval_datasets/exports/`
-- `eval_datasets/results/`
 - `eval_datasets/runs/`
 - `eval_datasets/seeds/`
 - `eval_datasets/experiments/`

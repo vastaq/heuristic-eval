@@ -25,6 +25,25 @@ def parse_key_value(items: list[str]) -> dict[str, str]:
     return parsed
 
 
+def parse_optional_bool(value: str) -> bool | None:
+    normalized = value.strip().lower()
+    if normalized in {"true", "yes", "1"}:
+        return True
+    if normalized in {"false", "no", "0"}:
+        return False
+    if normalized in {"null", "none", "unset"}:
+        return None
+    raise SystemExit(f"expected true, false, or null for accepted direction, got: {value}")
+
+
+def default_accepted_direction(decision_type: str) -> bool | None:
+    if decision_type == "accept_direction":
+        return True
+    if decision_type in {"accept_variance", "stop_tuning"}:
+        return True
+    return None
+
+
 def load_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
@@ -49,7 +68,12 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--case-count", type=int, default=0)
     parser.add_argument("--success-count", type=int, default=0)
     parser.add_argument("--failure-count", type=int, default=0)
-    parser.add_argument("--decision-type", default="accept_direction")
+    parser.add_argument("--decision-type", default="needs_decision")
+    parser.add_argument(
+        "--accepted-direction",
+        choices=("true", "false", "null"),
+        help="Override accepted_direction; defaults to true only for accept_direction-like outcomes.",
+    )
     parser.add_argument("--primary-reason", default="Summarize the main evidence in one sentence.")
     parser.add_argument("--notes", default="")
     return parser
@@ -68,8 +92,12 @@ def main() -> int:
     manifest = load_json(template_dir / "run_manifest.template.json")
     decision = load_json(template_dir / "decision.template.json")
 
-    source_files = manifest.get("source_files", {})
-    source_files.update(parse_key_value(args.source_file))
+    source_files = parse_key_value(args.source_file)
+    accepted_direction = (
+        parse_optional_bool(args.accepted_direction)
+        if args.accepted_direction is not None
+        else default_accepted_direction(args.decision_type)
+    )
 
     created_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
     manifest.update(
@@ -98,6 +126,7 @@ def main() -> int:
             "profile": args.profile,
             "adapter": args.adapter,
             "decision_type": args.decision_type,
+            "accepted_direction": accepted_direction,
             "primary_reason": args.primary_reason,
             "human_signal_refs": [],
             "notes": args.notes,
