@@ -258,6 +258,49 @@ class ScriptTests(unittest.TestCase):
             self.assertEqual(len(payload["records"]), 2)
             self.assertEqual({record["role"] for record in payload["records"]}, {"role_a", "role_b"})
 
+    def test_init_eval_run_creates_thin_intake_files(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            output = Path(tmp) / "run"
+
+            result = run_script(
+                "init_eval_run.py",
+                "--run-id",
+                "demo_run",
+                "--project",
+                "demo",
+                "--output-dir",
+                str(output),
+                "--source-root",
+                "local/out",
+                "--source-file",
+                "summary=local/out/summary.json",
+                "--controlled-variable",
+                "season",
+                "--content-unit",
+                "forest",
+                "--case-count",
+                "4",
+                "--success-count",
+                "3",
+                "--failure-count",
+                "1",
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            manifest = json.loads((output / "manifest.json").read_text(encoding="utf-8"))
+            decision = json.loads((output / "decision.json").read_text(encoding="utf-8"))
+            self.assertEqual(manifest["run_id"], "demo_run")
+            self.assertEqual(manifest["project"], "demo")
+            self.assertEqual(manifest["source_artifact_root"], "local/out")
+            self.assertEqual(manifest["source_files"]["summary"], "local/out/summary.json")
+            self.assertEqual(manifest["controlled_variables"], ["season"])
+            self.assertEqual(manifest["content_units"], ["forest"])
+            self.assertEqual(manifest["case_count"], 4)
+            self.assertEqual(manifest["success_count"], 3)
+            self.assertEqual(manifest["failure_count"], 1)
+            self.assertEqual(decision["decision_id"], "demo_run_decision")
+            self.assertEqual((output / "human_signals.jsonl").read_text(encoding="utf-8"), "")
+
     def test_batch_import_filters_roles_and_maps_scene_metadata(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

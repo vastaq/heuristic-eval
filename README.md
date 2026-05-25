@@ -1,9 +1,19 @@
 # Heuristic Evaluation Dataset
 
-`heuristic-eval-dataset` helps agents turn evaluation feedback into maintainable
-datasets. It gives an agent a shared workflow for importing old tests, curating
-canonical records, generating new candidate cases, absorbing evaluator results,
-and deciding when to revise, retire, accept variance, or stop tuning.
+`heuristic-eval-dataset` is a small file-backed toolkit for turning evaluation
+feedback into maintainable evidence, decisions, and datasets. It gives agents a
+shared workflow for importing old tests, curating canonical records, generating
+new candidate cases, absorbing evaluator results, and deciding when to revise,
+retire, accept variance, or stop tuning.
+
+This repository is not only a skill package. The skill under `skills/` is one
+agent-readable entrypoint into a larger project structure:
+
+- `eval_datasets/` is the actual dataset, run-intake, methodology, template, and
+  script workspace.
+- `skills/heuristic-eval-dataset/SKILL.md` tells an agent how to use that
+  workspace.
+- `README.md` is the human and repository-level orientation.
 
 It is designed for prompt and agent behavior evaluation where failures should
 improve the dataset and rubric over time, not simply add more prompt
@@ -33,11 +43,16 @@ overfitting.
 
 It includes:
 
+- `README.md`: repository-level orientation and quick start.
 - `skills/heuristic-eval-dataset/SKILL.md`: an agent-readable workflow skill.
 - `eval_datasets/methodology/`: framework guidance, heuristic-learning
   protocol, and bundled profile references.
 - `eval_datasets/profiles/`: profile notes for eval-domain-specific schemas.
 - `eval_datasets/adapters/`: adapter notes for evaluator-specific file shapes.
+- `eval_datasets/templates/`: copyable manifests and decision templates for
+  project-local eval loops.
+- `eval_datasets/examples/`: non-private case patterns showing how to apply the
+  framework without shipping project data.
 - `eval_datasets/scripts/`: reference scripts for current adapters, replay,
   reward, validation, and bootstrap workflows.
 - `eval_datasets/tests/`: script-level regression tests.
@@ -52,7 +67,7 @@ It intentionally does not include project data:
 
 ## What This Is For
 
-Use this as a shared base for four jobs:
+Use this repository as a shared base for six jobs:
 
 1. Feed old tests and references into a traceable dataset.
 2. Maintain existing evaluation records.
@@ -106,6 +121,13 @@ conversation-role fields such as `role`, `character_context`, or `scene_type`.
 
 See `eval_datasets/methodology/framework_profile_adapter.md`.
 
+The repository also includes a lightweight `generative_content` profile and a
+`batch_story_generation` adapter note for projects that already have their own
+batch runner, LLM review, local diagnostics, and human review. That path is meant
+to participate in prompt optimization without requiring immediate dataset
+generation. See
+`eval_datasets/methodology/eval_optimization_without_dataset_generation.md`.
+
 ## Human Signals
 
 The project does not require a labeling queue or heavy reviewer workflow.
@@ -139,13 +161,18 @@ case, a rubric revision, a failure pattern, a retired noisy sample, or an
 ## Repository Layout
 
 ```text
+README.md
+package.json
+
 skills/heuristic-eval-dataset/
-  SKILL.md                 # Agent-readable workflow skill
+  SKILL.md                 # Optional agent-readable entrypoint
 
 eval_datasets/
   methodology/             # Shared framework and bundled profile guidance
   profiles/                # Eval-domain-specific schema notes
   adapters/                # Evaluator-specific adapter notes
+  templates/               # Copyable run/decision/human-signal templates
+  examples/                # Public case patterns without private data
   scripts/                 # Reference scripts and current adapters
   tests/                   # Regression tests for the scripts
   canonical/               # Local canonical JSON datasets; intentionally empty
@@ -163,15 +190,42 @@ The `skills/` directory is intentionally tool-agnostic. It stores the workflow
 instructions as plain Markdown so Cursor, Codex, Claude, or a human maintainer
 can read or adapt them.
 
-It is not where dataset records live. The actual dataset system lives under
-`eval_datasets/`. If a specific editor or agent runtime needs a different
-skill location, copy or symlink `skills/heuristic-eval-dataset/SKILL.md` into that
-runtime's expected path.
+It is not the whole project and it is not where dataset records live. The actual
+dataset system lives under `eval_datasets/`. If a specific editor or agent
+runtime needs a different skill location, copy or symlink
+`skills/heuristic-eval-dataset/SKILL.md` into that runtime's expected path while
+keeping the repository available as the working toolkit.
 
-## Installation
+## Quick Start
 
-This is an agent-native toolkit. Install the skill folder into the skill
-directory used by your agent runtime.
+Clone or vendor the repository into the project that needs eval maintenance:
+
+```bash
+git clone https://github.com/vastaq/heuristic-eval-dataset.git
+cd heuristic-eval-dataset
+npm install
+npm test
+```
+
+Then use `eval_datasets/` as the local place for run intake, profiles, adapter
+notes, canonical records, templates, and scripts. Project data can stay in
+ignored local directories or in the project that references this toolkit.
+
+For an existing project that already has generated outputs or evaluator
+summaries, start by creating a thin run-intake skeleton:
+
+```bash
+python3 eval_datasets/scripts/init_eval_run.py \
+  --run-id example_run_001 \
+  --project example_project \
+  --source-root path/to/project/local/output \
+  --source-file summary=path/to/project/local/output/summary.json
+```
+
+## Optional Agent Skill
+
+For agent runtimes that support skills, install the skill folder as an entrypoint
+into the repository workflow:
 
 ```bash
 mkdir -p .agents/skills
@@ -186,9 +240,9 @@ skill directory and keep the same folder shape:
 ```
 
 The skill is plain Markdown. It gives the agent operating rules for heuristic eval
-dataset work, but it does not install data by itself. The bundled methodology
-and scripts are tools the agent can use after the repository is present in a
-project.
+dataset work, but it does not install the toolkit or data by itself. The bundled
+methodology and scripts are tools the agent can use after the repository is
+present in a project.
 
 ## Basic Workflow
 
@@ -340,6 +394,47 @@ python3 eval_datasets/scripts/score_hl_mutation.py \
   eval_datasets/experiments/example/reward_assessments/example.reward.json \
   --mutation-id example_mutation
 ```
+
+### Optimize Without Generating A Dataset
+
+Use this when a project already has generated outputs, review summaries, and
+human judgment, but does not yet need new canonical records.
+
+Typical actions:
+
+- Pick or create a profile, such as `generative_content`.
+- Pick or create an adapter note for the project output shape.
+- Store a small run manifest and decision record that point to local artifacts.
+- Capture human signals that reinterpret scores or block misleading tuning.
+- Keep local diagnostics as warnings unless they are supported by human or LLM
+  review.
+
+Useful starting templates:
+
+```text
+eval_datasets/templates/generative_content/run_manifest.template.json
+eval_datasets/templates/generative_content/decision.template.json
+eval_datasets/templates/generative_content/human_signals.template.jsonl
+```
+
+Or create a run skeleton directly:
+
+```bash
+python3 eval_datasets/scripts/init_eval_run.py \
+  --run-id story_eval_001 \
+  --project example_project \
+  --profile generative_content \
+  --adapter batch_story_generation \
+  --source-root path/to/project/local/output \
+  --source-file llm_review=path/to/review.json \
+  --controlled-variable season \
+  --content-unit example_map
+```
+
+See `eval_datasets/profiles/generative_content/README.md` and
+`eval_datasets/adapters/batch_story_generation/README.md`. For a concrete
+non-private pattern, see
+`eval_datasets/examples/generative_content_prompt_optimization.md`.
 
 ### Other Supporting Tasks
 

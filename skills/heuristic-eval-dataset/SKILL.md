@@ -1,21 +1,31 @@
 ---
 name: heuristic-eval-dataset
-description: Use when creating, updating, importing, exporting, auditing, or evolving heuristic evaluation datasets, especially conversation role evals, evaluator feedback absorption, Promptfoo adapters/examples, canonical test JSON, candidate/accepted review status, prompt-bloat control, case-by-case prompt patching, abstraction drift, eval reward-shape bias, or legacy test*.yaml migration.
+description: Use when working with the heuristic-eval-dataset repository or its eval_datasets workspace: creating, updating, importing, exporting, auditing, or evolving heuristic evaluation datasets; absorbing evaluator feedback; maintaining profiles/adapters/templates; handling conversation role evals, Promptfoo adapters/examples, canonical test JSON, candidate/accepted review status, prompt-bloat control, case-by-case prompt patching, abstraction drift, eval reward-shape bias, or legacy test*.yaml migration.
 ---
 
 # Heuristic Evaluation Dataset
 
 ## Overview
 
-Use this skill to turn evaluation feedback into maintainable datasets. The
-agent should import old tests, curate canonical records, generate candidate
-cases, absorb evaluator results, and decide whether to revise, retire, accept
-variance, stop tuning, or create a new regression case.
+Use this skill as an agent entrypoint into the `heuristic-eval-dataset`
+repository. The repository is not only a skill package: `eval_datasets/` is the
+actual file-backed workspace for methodology, profiles, adapters, templates,
+scripts, run intake, canonical records, experiments, and evolution memory.
+
+Use the repository to turn evaluation feedback into maintainable datasets and
+decisions. The agent should import old tests, curate canonical records, generate
+candidate cases, absorb evaluator results, and decide whether to revise, retire,
+accept variance, stop tuning, or create a new regression case.
 
 Treat `eval_datasets` as a file-backed dataset system for heuristic prompt and
 agent-behavior evaluation. Canonical JSON is the editable source of truth.
 Evaluator-specific exports, such as Promptfoo YAML, are generated views. Legacy
 evaluator files are source material, not the long-term dataset.
+
+Do not treat installing this skill as installing the whole project. If the
+repository is not present in the current workspace, first locate, clone, vendor,
+or reference the repository before relying on scripts, profiles, adapters, or
+templates.
 
 The bundled profile is conversation role eval. Keep that profile concrete:
 preserve raw evaluation assets, distill reusable conversation-core records, and
@@ -35,6 +45,12 @@ The bundled Python scripts are reference implementations for the current
 conversation-role profile and Promptfoo adapter. For a new domain or evaluator,
 create a new profile or adapter instead of forcing data into conversation-role
 fields.
+
+For generative-content projects that already have a batch runner, LLM review,
+local diagnostics, and human review, the framework can participate without
+generating new canonical records. Use the `generative_content` profile,
+`batch_story_generation` adapter notes, and run/decision templates to capture the
+optimization loop as evidence, signals, and a compressed decision.
 
 Use the heuristic-learning controller when evaluator failures, human review, or
 cross-role signals should change the dataset over time. Do not jump directly
@@ -60,30 +76,27 @@ the eval first.
 
 ## Dataset Layout
 
-Use these paths:
+Choose folders by the job, not by memorizing every path:
 
-| Path | Purpose |
-| --- | --- |
-| `eval_datasets/canonical/all_existing_role_tests.v1.json` | Broad legacy intake dataset across existing role test YAML files |
-| `eval_datasets/canonical/*.json` | Focused canonical datasets for specific profiles, projects, or roles |
-| `eval_datasets/exports/*.yaml` | Generated evaluator views, with Promptfoo YAML as the default example |
-| `eval_datasets/profiles/*/` | Profile-owned schema, taxonomy, rubric, and acceptable-band notes |
-| `eval_datasets/adapters/*/` | Evaluator-owned import/export/result-normalization notes |
-| `eval_datasets/seeds/*.json` | Source snapshots or partial migrations |
-| `eval_datasets/methodology/*.md` | Schema, taxonomy, rubric, and update guidance |
-| `eval_datasets/scripts/*.py` | Import, export, and audit tools |
-| `eval_datasets/evolution/events.jsonl` | Append-only event log for test asset evolution |
-| `eval_datasets/evolution/failure_patterns/*.json` | Role or project failure models |
-| `eval_datasets/experiments/*/learning_state*.json` | Compact state snapshots for active heuristic-learning loops |
-| `eval_datasets/experiments/*/dataset_candidate_units/*.json` | Experiment-layer units for constructing candidate datasets from observations |
-| `eval_datasets/experiments/*/reward_assessments/*.reward.json` | Reward assessments for replay observations and mutations |
-| `eval_datasets/runs/<evaluator>/<run_id>/` | Full evaluator run intake: raw output, normalized observations, summary, and decision |
-| `eval_datasets/replay/configs/*.yaml` | Lightweight HL replay executor configs |
-| `eval_datasets/replay/contexts/*.yaml` | Context assembly configs for HL replay |
-| `eval_datasets/replay/outputs/*.observations.json` | Structured replay observations for reward assessment |
-| `eval_datasets/manifests/**/*.json` | Dataset, experiment, and release gate selections |
+- Need to understand the framework: read `eval_datasets/methodology/`.
+- Need to adapt a domain: use `eval_datasets/profiles/<profile>/`.
+- Need to adapt an evaluator or runner: use `eval_datasets/adapters/<adapter>/`.
+- Need a copyable starting shape: use `eval_datasets/templates/<profile>/`.
+- Need deterministic tooling: run scripts from `eval_datasets/scripts/`.
+- Need to save an evaluator or batch run: write
+  `eval_datasets/runs/<adapter>/<run_id>/`.
+- Need to try a learning loop or mutation: write `eval_datasets/experiments/`.
+- Need durable reviewed records: write `eval_datasets/canonical/`.
+- Need evaluator-specific generated files: write `eval_datasets/exports/`.
+- Need old raw/source snapshots: write `eval_datasets/seeds/`.
+- Need durable memory of decisions or failure patterns: write
+  `eval_datasets/evolution/`.
+- Need optional lightweight replay wiring: use `eval_datasets/replay/`.
 
-Do not hand-edit generated exports when the canonical record should change.
+Most new project integrations should start with `runs/`, not `canonical/`.
+Create canonical records only after a repeated, judgeable failure needs replay
+or gate protection. Do not hand-edit generated exports when the canonical record
+should change.
 
 ## Scope And Profiles
 
@@ -171,6 +184,10 @@ to bootstrap learning state without automatically accepting records.
 Use `eval_datasets/methodology/human_signal_capture.md` when the user gives a
 short judgment, preference, stop rule, or strategy note that should become
 heuristic memory without creating a heavy review workflow.
+Use `eval_datasets/methodology/eval_optimization_without_dataset_generation.md`
+when a project already has generated outputs and evaluator summaries, and the
+right action is to capture run evidence, human signals, and decisions before
+creating any new dataset records.
 
 ## Learning Controller Workflow
 
@@ -354,30 +371,6 @@ behavior, and safe refusal. Role-specific dimensions include perception-axis
 collapse, prop stuffing, borrowed imagery, project lore drift, and known failure
 modes unique to one role family.
 
-## New Role Workflow
-
-1. Inspect comparable roles in `eval_datasets/canonical/` and the new
-   role's prompt files.
-2. Define the role axis:
-
-   ```text
-   This role understands human experience through [perception axis], not through [literal props].
-   ```
-
-3. Query existing records for similar scenes, boundaries, and risks before
-   writing new tests.
-4. Create 5-10 `candidate` smoke records first.
-5. Cover these buckets before expanding:
-   - `core_smoke`
-   - `micro_narrative`
-   - `tiny_practical`
-   - `boundary_regression`
-   - `identity_boundary`
-   - `context_drift`
-   - `small_joy`
-6. Export a role-specific evaluator view, such as Promptfoo YAML.
-7. Run eval, inspect outputs, then update record status and rubrics.
-
 ## Eval Failure Learning
 
 When an eval fails, do not only tune the prompt. Classify the failure:
@@ -415,6 +408,42 @@ should come next.
 Stop tuning when core identity, boundary, and naturalness are stable and the
 remaining failures are low-severity style disagreements. Do not make the prompt
 more rigid just to pass a few more narrow tests.
+
+## Generative Content Optimization
+
+When the project is a generator, such as a story, scene, summary, or creative
+content system, do not force its artifacts into the conversation-role schema.
+
+Use `eval_datasets/profiles/generative_content/README.md` to define the quality
+dimensions and acceptable band. Use
+`eval_datasets/adapters/batch_story_generation/README.md` when project-local
+outputs already include a catalog, matrix, raw runs, CSV, local diagnostics, LLM
+review, or human comments.
+
+In this mode, dataset generation is optional. The smallest useful framework
+participation is:
+
+1. Run `eval_datasets/scripts/init_eval_run.py` to create a run-intake skeleton,
+   or copy the templates manually when a custom shape is needed.
+2. Point the manifest at the project's existing output directory.
+3. Capture short user judgments in `human_signals.jsonl`.
+4. Write `decision.json` using the template.
+5. Only create candidate records if a repeated, judgeable regression needs
+   replay protection.
+
+Treat rule-based checks as `structural_diagnostics`, not as final quality
+scores. If a human says a metric is misleading, classify that signal before
+editing the prompt.
+
+Example:
+
+```bash
+python3 eval_datasets/scripts/init_eval_run.py \
+  --run-id story_eval_001 \
+  --project example_project \
+  --source-root path/to/project/local/output \
+  --source-file summary=path/to/project/local/output/summary.json
+```
 
 ## Updating Existing Testsets
 
@@ -455,98 +484,10 @@ python3 eval_datasets/scripts/audit_testset_balance.py \
   eval_datasets/canonical/all_existing_role_tests.v1.json
 ```
 
-## Query Patterns
+## Reporting
 
-For large canonical files, do not read the whole file unless necessary. Prefer
-small scripts or targeted searches.
-
-Examples:
-
-```bash
-python3 - <<'PY'
-import json
-from collections import Counter
-data=json.load(open("eval_datasets/canonical/all_existing_role_tests.v1.json"))
-print(Counter(r["role"] for r in data["records"]).most_common())
-PY
-```
-
-```bash
-python3 - <<'PY'
-import json
-role="slowpoke"
-data=json.load(open("eval_datasets/canonical/all_existing_role_tests.v1.json"))
-for r in data["records"]:
-    if r["role"] == role and r["review_status"] == "candidate":
-        print(r["id"], r["source_path"], r["input"][:80])
-PY
-```
-
-## Review Checklist
-
-Before marking a record `accepted`, verify:
-
-- The input sounds like a real user message.
-- The sample tests role perception, not costume props.
-- The target behavior is judgeable.
-- The avoid behavior catches real failure modes.
-- The original hard assertions still make sense.
-- The record has useful `layer`, `scene_type`, `difficulty`, and `tags`.
-- Similar accepted records are not duplicates.
-- There is evidence for promotion: human review, repeated eval failure, a stable
-  regression signal, or a link to a known failure model.
-- The record is not an experiment-only module being promoted prematurely.
-- Passing or failing the record would not push the prompt toward excessive
-  constraints, keyword stuffing, or over-performed role flavor.
-
-## Experiment Module Rules
-
-New rubrics, taxonomies, hard assertions, and failure packs start as experiments.
-Use them against candidate pools first. Promote them only when they:
-
-- Catch a meaningful failure without rewarding keyword stuffing.
-- Do not overfit to one project unless intentionally project-specific.
-- Produce inspectable evidence from eval runs or human review.
-- Have a clear retirement path if they create noise.
-
-## Common Mistakes
-
-- Editing `exports/*.yaml` and forgetting to update canonical.
-- Re-importing legacy YAML and overwriting reviewed statuses.
-- Flattening all inputs into `question` when a prompt expects `user_input`.
-- Dropping extra `vars` such as shared context files.
-- Treating `legacy_import` as finished classification.
-- Optimizing pass rate before inspecting representative outputs.
-- Adding prompt rules for every failed case instead of accepting reasonable
-  variance or revising noisy tests.
-- Overfitting a prompt to pass a narrow case while making ordinary conversation
-  stiffer.
-- Treating many small `if` fixes as proof that the prompt needs more detail
-  instead of diagnosing a missing or unclear principle.
-- Letting project-specific datasets redefine the generic conversation core.
-- Promoting experiment records into release gates without evidence.
-- Losing raw source details while trying to make records cleaner.
-- Adding local test assets when the real missing piece is state, policy, reward,
-  replay, or compression.
-- Treating the event log as learning by itself; it is memory, not the controller.
-
-## Output Summary Format
-
-When reporting work on this dataset system, include:
-
-```markdown
-## Coverage
-- Source files:
-- Records:
-- Roles:
-- Accepted / candidate / needs_revision / retired:
-
-## Changes
-- ...
-
-## Verification
-- ...
-
-## Remaining Classification Work
-- ...
-```
+When reporting work on this system, keep the summary short and include coverage,
+changes, verification, and remaining classification work when relevant. For
+detailed role workflows, checklist items, rubric guidance, or experiment module
+rules, read the specific methodology or profile document instead of expanding
+this skill in-context.

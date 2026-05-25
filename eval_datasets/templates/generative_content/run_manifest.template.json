@@ -1,0 +1,27 @@
+{
+  "run_id": "project_run_YYYYMMDD_HHMMSS",
+  "project": "example_project",
+  "profile": "generative_content",
+  "adapter": "batch_story_generation",
+  "created_at": "YYYY-MM-DDTHH:MM:SSZ",
+  "source_artifact_root": "path/to/project/local/output",
+  "source_files": {
+    "catalog": "path/to/story-catalog.json",
+    "matrix": "path/to/story-test-matrix.json",
+    "generation_summary": "path/to/summary.json",
+    "readable_results": "path/to/csv/story-results.csv",
+    "structural_diagnostics": "path/to/heuristic-summary.json",
+    "llm_review": "path/to/llm-review/review-results.json"
+  },
+  "controlled_variables": [
+    "example_variable_1",
+    "example_variable_2"
+  ],
+  "content_units": [
+    "example_content_unit"
+  ],
+  "case_count": 0,
+  "success_count": 0,
+  "failure_count": 0,
+  "notes": "Keep private data in the project workspace. This manifest only points to it."
+}

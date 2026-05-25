@@ -1,0 +1,31 @@
+{
+  "decision_id": "project_run_YYYYMMDD_HHMMSS_decision",
+  "run_id": "project_run_YYYYMMDD_HHMMSS",
+  "profile": "generative_content",
+  "adapter": "batch_story_generation",
+  "decision_type": "accept_direction",
+  "accepted_direction": true,
+  "primary_reason": "Summarize the main evidence in one sentence.",
+  "score_interpretation": {
+    "primary_quality_signal": "human_review_or_llm_review",
+    "diagnostic_only_signals": [
+      "keyword_coverage",
+      "motif_mentions"
+    ],
+    "downgraded_metrics": []
+  },
+  "human_signal_refs": [
+    "human_signals.jsonl#1"
+  ],
+  "blocked_actions": [
+    "prompt_patch_without_replay"
+  ],
+  "next_actions": [
+    "state the next smallest useful action"
+  ],
+  "dataset_generation": {
+    "needed": false,
+    "reason": "No repeated judgeable regression case yet."
+  },
+  "notes": ""
+}
