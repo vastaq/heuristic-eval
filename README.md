@@ -75,9 +75,23 @@ The Python scripts are working primitives and examples, not the universal
 encoding of the framework. Agents should compose, adapt, or add profile/adapter
 tools when a project has a different runner or evidence shape.
 
-## Agent Installation
+## Agent-Native Usage
 
-Clone or vendor the repository into the project that needs eval maintenance:
+This framework is meant to be handed to an agent, not manually installed like a
+traditional CLI package.
+
+Give the agent this repository URL and ask it to use `skills/heuristic-eval/SKILL.md`
+as the operating entrypoint for eval feedback work:
+
+```text
+Use https://github.com/vastaq/heuristic-eval as the heuristic-eval framework for
+this project. Read skills/heuristic-eval/SKILL.md, inspect the target eval
+artifacts, and create run intake, observations, decisions, or candidate eval
+assets as needed.
+```
+
+The agent should locate, clone, vendor, or reference the repository in whatever
+way fits the current workspace:
 
 ```bash
 git clone https://github.com/vastaq/heuristic-eval.git
@@ -86,22 +100,24 @@ npm install
 npm test
 ```
 
-For agent runtimes that support skills, symlink the skill folder so the agent
-entrypoint stays synced with the repository:
+For agent runtimes that support skills, the agent can symlink the skill folder
+so the entrypoint stays synced with the repository:
 
 ```bash
 mkdir -p .agents/skills
 ln -s "$PWD/skills/heuristic-eval" .agents/skills/heuristic-eval
 ```
 
-If the runtime uses a different skill root, keep the same folder shape:
+If the runtime uses a different skill root, the agent should keep the same
+folder shape:
 
 ```text
 <tool-skill-root>/heuristic-eval/SKILL.md
 ```
 
 The skill does not install data. It tells the agent how to use this repository
-as the local eval-maintenance framework.
+as the local eval-maintenance framework. Human setup can stay minimal: point the
+agent at the repo and the target project's eval artifacts.
 
 ## Core Workflows
 

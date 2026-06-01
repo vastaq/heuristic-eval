@@ -11,6 +11,10 @@ Use this skill as the short agent entrypoint into the
 adapters, templates, scripts, run intake, canonical records, experiments, and
 evolution memory.
 
+If this repository is not present in the current workspace, locate, clone,
+vendor, or reference it before relying on its scripts, profiles, adapters, or
+templates.
+
 The job is to turn eval feedback into maintainable evidence and decisions. A
 failed eval can become a candidate case, rubric revision, failure pattern,
 retirement, acceptable variance, or stop-tuning decision. It is not
