@@ -55,8 +55,12 @@ Minimal shape:
 	    "has_replay": true,
 	    "has_source_trace": true,
 	    "has_judge_or_dry_run": true,
-	    "has_real_model_output": true
+	    "has_real_model_output": true,
+	    "has_real_judge_score": true,
+	    "risk_signals_clear": true
 	  },
+	  "assessment_level": "judged_replay",
+	  "risk_flags": [],
 	  "decision": "keep_experiment"
 	}
 ```
@@ -79,10 +83,32 @@ Minimal shape:
 Pass rate is evidence, not the reward. Promotion still requires replay and human
 review.
 
+Dry-run observations and replay outputs without real judge scores are not formal
+reward evidence. They should produce `assessment_level: dry_run` or
+`assessment_level: unjudged_replay` with `decision: not_assessed`, even when the
+file shape is otherwise valid.
+
+When a run decision includes `reward_assessment_refs`, the action-plan validator
+should accept only `assessment_level: judged_replay` rewards with real model
+output and real judge scores. Judged replay rewards must carry
+`observation_run_id` for the current `run_id`; a reward without that run context
+is not formal decision evidence. A `not_assessed` reward file can document
+wiring, but cannot support prompt mutation, dataset generation, acceptance, or
+compression. For prompt mutation decisions, referenced rewards should support
+the mutation path (`compress_candidate` or `keep_experiment`); `needs_revision`
+and `retire_or_noop` are evidence to revise, stop, or discard rather than push
+the mutation forward. Prefer run-directory-relative refs for portable run
+archives, for example `reward_assessments/compact_v1.reward.json`.
+
 Human signals can change reward interpretation. If the user says a passing
 answer feels stiff, increase prompt-bloat concern. If the user says remaining
 failures are acceptable, prefer `accept_variance` or `stop_tuning` over prompt
 edits.
+
+High pass rate is not enough for compression. If observations carry risk flags
+such as `naturalness_low`, `prompt_bloat_risk`, `overfit_risk`, or
+`regression_risk_high`, the automatic assessment should keep the mutation out of
+`compress_candidate` until those risks are reviewed or replayed away.
 
 ## Bloat And Overfit Checks
 
@@ -117,4 +143,11 @@ For a newly generated, imported, or rebalanced eval pack, require a dataset
 traction audit before treating pass rate as prompt-tuning pressure. If the audit
 recommends `revise_or_supplement_eval_first`, the reward decision should usually
 be `revise_rubric`, `needs_revision`, `accept_variance`, or `stop_tuning`, not a
-prompt mutation.
+prompt mutation. When that recommendation becomes the primary decision, record
+`decision_type: revise_or_supplement_eval_first` with `traction_audit_ref`,
+`eval_revision_targets` or `replay_targets`, plus state and event refs.
+If the audit recommends `inspect_before_prompt_tuning`, treat prompt mutation as
+blocked for the current decision and record an inspection or review target first.
+Use `decision_type: inspect_before_prompt_tuning` with a `traction_audit_ref`,
+`next_review_targets` or `replay_targets`, plus state and event refs, so the
+medium-warning review becomes the next task rather than an unowned warning.

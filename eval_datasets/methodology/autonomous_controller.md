@@ -5,6 +5,12 @@ turning the work into a rigid pipeline. It defines mandatory checkpoints. The
 agent still chooses the concrete action based on the project, evaluator, role,
 and user goal.
 
+Use the lightest path that preserves evidence. Do not run the full controller
+for routine exports, typo fixes, or metadata cleanup that do not change prompts,
+rubrics, canonical records, gates, or failure patterns. Use the full controller
+when changing prompts, considering a prompt or policy mutation, promoting data,
+or making a durable learning decision.
+
 ## Trigger Conditions
 
 Run this controller before changing prompts, rubrics, canonical records, gates,
@@ -47,7 +53,13 @@ Each autonomous iteration must produce one primary outcome.
 2. **Read state**: inspect or create `learning_state*.json`.
 3. **Classify**: mark the signal as prompt issue, rubric issue, case issue,
    taxonomy gap, failure-model gap, noisy eval, acceptable variance, or overfit
-   pressure.
+   pressure. When normalized observations exist, `route_hl_observations.py` can
+   produce conservative routing evidence for `stop_tuning`,
+   `failure_pattern_candidate`, or `create_dataset_candidate_unit`. Decisions
+   that rely on the route should carry `observation_route_ref` so the action-plan
+   guard can reject unsupported outcomes, missing observations, mismatched
+   profile/adapter context, missing stable record evidence, or ignored blocked
+   actions.
 4. **Choose the smallest action**: prefer classification, rubric/case revision,
    failure pattern, targeted replay, or compact experiment before prompt edits.
 5. **Run the prompt-bloat gate** if any prompt or policy change is considered.
@@ -90,6 +102,14 @@ Before adding prompt constraints, answer all of these:
 - Does it duplicate an existing principle in different words?
 - Would it make ordinary conversation more rigid, verbose, or overperformed?
 - Can it be removed later if the failure disappears?
+
+When this becomes a `decision.json` gate, do not only write
+`checked: true`. Keep these fields explicit:
+
+- `repeated_failure_basis`
+- `non_prompt_alternatives_considered`
+- `ordinary_interaction_risk`
+- `removal_condition`
 
 If the answer is weak, choose `accept_variance`, `revise_rubric`,
 `needs_revision`, `retired`, or `failure_pattern` instead.

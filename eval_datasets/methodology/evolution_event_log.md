@@ -24,7 +24,7 @@ Each line is one JSON object:
   "event_type": "case_added",
   "record_id": "conversation_core_low_energy_no_advice_001",
   "dataset_path": "eval_datasets/canonical/conversation_core.v1.json",
-  "actor": "heuristic-eval-dataset-skill",
+  "actor": "heuristic-eval-skill",
   "source": {
     "type": "legacy_asset",
     "path": "tapdoki/test.roles_ordinary.yaml",
@@ -54,6 +54,7 @@ Each line is one JSON object:
 | `rubric_revised` | A rubric changes because it was too broad, too narrow, or rewarded the wrong behavior. |
 | `failure_pattern_added` | A generic or role-specific failure mode is created or updated. |
 | `human_signal_captured` | A user judgment, preference, stop rule, or strategy note becomes structured memory. |
+| `profile_adapter_updated` | A profile or adapter note is created or materially updated so a new domain or evaluator can guide work. |
 | `experiment_started` | A new module starts in the experiment layer. |
 | `experiment_promoted` | An experiment proves value and enters core, project extension, or gate. |
 | `experiment_retired` | An experiment is dropped due to noise, low reuse, or overfitting. |
@@ -68,6 +69,8 @@ Use one or more evidence kinds:
 - `eval_failure`: A model output failed in a meaningful way.
 - `repeated_regression`: The same failure appeared across runs, prompts, or roles.
 - `legacy_assertion`: An old hard assertion still protects behavior.
+- `module_ref`: A profile, adapter, or other module note explains the local
+  evidence shape or domain boundary.
 - `coverage_gap`: The case fills a known role, layer, scene, or dimension gap.
 - `cross_project_reuse`: The case or failure pattern applies to more than one
   project or role family.
@@ -77,6 +80,9 @@ Use one or more evidence kinds:
 - Log decision events, not every script run.
 - Prefer short evidence summaries over dumping full model outputs.
 - Link to result files when the full evidence already exists elsewhere.
+- When an event is used through `event_refs` in a run decision, include the
+  current `run_id` and enough decision context, such as `decision_id` and
+  `human_signal_refs`, so the reference cannot be reused for another run.
 - Never include secrets, API keys, or raw private user data.
 - If a decision reverses an earlier event, append a new event instead of editing
   the old line.

@@ -37,6 +37,35 @@ Use these concepts when adapting a project:
   pressure.
 - `decision`: compressed outcome for the next optimization step.
 
+## Required Fields
+
+Use these fields when this profile produces dataset candidate records. Do not
+invent conversation-role fields for generated-content records.
+
+- `id`: stable candidate record id.
+- `layer`: intake, experiment, project extension, core, or gate.
+- `content_unit`: generated artifact or coherent generated flow under review.
+- `source_prompt`: stable prompt, policy, or context that produced the content.
+- `variable_set`: controlled input variables for the run.
+- `generation_result`: raw or normalized generated output under evaluation.
+- `target_behavior`: quality behavior the candidate should preserve or test.
+- `avoid_behavior`: failure behavior the candidate should catch.
+- `quality_signals`: rubric, LLM review, diagnostic, or human signal refs.
+- `rubric_ref`: profile-local rubric or quality dimension reference.
+- `source_path`: source run, output, or review file path.
+- `review_status`: candidate, needs_revision, accepted, or retired.
+
+## List Fields
+
+These fields should be lists when present:
+
+- `variable_set`
+- `target_behavior`
+- `avoid_behavior`
+- `quality_signals`
+- `tags`
+- `evidence_refs`
+
 ## Suggested Run Dimensions
 
 For creative generation, keep controlled variables explicit and small. Examples:

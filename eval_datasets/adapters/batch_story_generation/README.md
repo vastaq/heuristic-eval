@@ -112,13 +112,20 @@ Tags are not automatic prompt changes. They are observations for decisions.
 ## Thin-Slice Decision Example
 
 A prompt-optimization run may produce this decision without generating new
-dataset records:
+dataset records. If it accepts a direction, keep the decision evidence-bound:
 
 ```json
 {
+  "decision_id": "story_run_001_decision",
+  "run_id": "story_run_001",
+  "profile": "generative_content",
+  "adapter": "batch_story_generation",
   "decision_type": "revise_variable_injection",
   "accepted_direction": true,
   "primary_reason": "Stable map prompt improved atmosphere, but time-specific preset text caused variable conflicts.",
+  "human_signal_refs": ["human_signals.jsonl#1"],
+  "event_refs": ["events.jsonl#evt_story_run_001_decision"],
+  "learning_state_ref": "eval_datasets/experiments/story_run_001/learning_state.v1.json",
   "blocked_actions": [
     "rewrite_stable_prompt_for_single_case",
     "optimize_for_visual_keyword_coverage"
@@ -132,4 +139,7 @@ dataset records:
 ```
 
 This is useful framework participation even though no canonical dataset was
-created.
+created. Before treating the accepted direction as controlled, run
+`eval_datasets/scripts/validate_learning_action_plan.py` on the run directory so
+the human-signal refs, event refs, learning-state ref, prompt-bloat gate, and
+replay or audit targets are checked.

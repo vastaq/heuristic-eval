@@ -9,8 +9,10 @@ from pathlib import Path
 from typing import Any
 
 
-REQUIRED_TOP_LEVEL = ("id", "role", "scope", "failure_modes")
+REQUIRED_TOP_LEVEL = ("id", "scope", "failure_modes")
+OWNER_FIELDS = ("profile", "domain", "role")
 REQUIRED_MODE_FIELDS = ("id", "description", "signals", "evidence")
+REQUIRED_EVIDENCE_FIELDS = ("kind", "summary")
 
 
 def json_paths(path: Path) -> list[Path]:
@@ -28,6 +30,8 @@ def validate_payload(payload: dict[str, Any], path: Path) -> list[str]:
     for field in REQUIRED_TOP_LEVEL:
         if not require_non_empty(payload.get(field)):
             errors.append(f"{path}: missing {field}")
+    if not any(require_non_empty(payload.get(field)) for field in OWNER_FIELDS):
+        errors.append(f"{path}: missing one of {', '.join(OWNER_FIELDS)}")
 
     modes = payload.get("failure_modes")
     if not isinstance(modes, list) or not modes:
@@ -45,6 +49,18 @@ def validate_payload(payload: dict[str, Any], path: Path) -> list[str]:
             errors.append(f"{path}: failure_modes[{index}].signals must be a list")
         if "evidence" in mode and not isinstance(mode["evidence"], list):
             errors.append(f"{path}: failure_modes[{index}].evidence must be a list")
+        elif isinstance(mode.get("evidence"), list):
+            for evidence_index, evidence in enumerate(mode["evidence"]):
+                if not isinstance(evidence, dict):
+                    errors.append(
+                        f"{path}: failure_modes[{index}].evidence[{evidence_index}] must be an object"
+                    )
+                    continue
+                for field in REQUIRED_EVIDENCE_FIELDS:
+                    if not require_non_empty(evidence.get(field)):
+                        errors.append(
+                            f"{path}: missing failure_modes[{index}].evidence[{evidence_index}].{field}"
+                        )
     return errors
 
 

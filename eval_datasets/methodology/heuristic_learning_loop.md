@@ -1,5 +1,10 @@
 # Heuristic Learning Loop for Role Evaluation
 
+Boundary: This is conversation_role-specific methodology, not universal
+framework schema. For non-conversation domains, map the shared heuristic loop
+through profile-local state, actions, replay, and compression destinations in
+`framework_profile_adapter.md`.
+
 Role-eval heuristic learning treats the testset system as software that can
 learn from feedback without updating model weights. The maintained object is not
 one prompt or one dataset. It is the connected system of canonical records,

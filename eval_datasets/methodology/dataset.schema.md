@@ -1,5 +1,10 @@
 # Role Evaluation Testset Schema
 
+Boundary: This is conversation_role-specific methodology, not universal
+framework schema. For non-conversation domains, define profile-local fields and
+promotion rules with `framework_profile_adapter.md` instead of inheriting
+`role`, `scene_type`, or Promptfoo variables.
+
 This schema is the canonical source format for reusable character evaluation
 testsets. Existing evaluator files, including Promptfoo YAML, can be imported
 into this shape, reviewed, updated, and exported back to runner-specific views

@@ -1,7 +1,7 @@
 {
-  "name": "heuristic-eval-dataset",
+  "name": "heuristic-eval",
   "private": true,
-  "description": "Shared protocol and tooling for evaluator-agnostic heuristic evaluation datasets.",
+  "description": "Agent-native framework for evaluator-agnostic heuristic eval feedback loops.",
   "scripts": {
     "test": "python3 -m unittest eval_datasets.tests.test_scripts",
     "py-compile": "python3 -m py_compile eval_datasets/scripts/*.py"

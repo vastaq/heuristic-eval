@@ -1,5 +1,10 @@
 # Role-Eval Heuristic System Spec
 
+Boundary: This is conversation_role-specific methodology, not universal
+framework schema. For non-conversation domains, keep the controller pattern but
+define profile-local state, actions, reward signals, and compression targets in
+`framework_profile_adapter.md`.
+
 This document defines the heuristic eval system as a heuristic learning system, not
 only as a testset database. The maintained object is the whole evaluation
 apparatus: records, rubrics, failure models, replay batches, event logs, skills,
@@ -134,7 +139,7 @@ Use this policy before writing files:
 8. Compress into one primary destination: accept variance, failure pattern,
    rubric revision, dataset revision, compact candidate, stop tuning, needs
    revision, retired, or gate promotion.
-9. Update state with the primary outcome and next replay target.
+9. Update state with the run scope, primary outcome, and next replay target.
 
 ## Reward Model
 
@@ -174,6 +179,11 @@ Prompt or policy changes are allowed only after cheaper actions have been
 considered. Before adding a rule, verify that the failure is repeated,
 user-visible, severe enough, not better handled by rubric/case revision, and
 not likely to make ordinary interaction rigid.
+
+For action-plan validation, the prompt-bloat gate must preserve concrete
+answers rather than only `checked: true`: `repeated_failure_basis`,
+`non_prompt_alternatives_considered`, `ordinary_interaction_risk`, and
+`removal_condition`.
 
 If several proposed rules are local `if`/`when` exceptions, stop and ask for the
 shared invariant. Allow a prompt mutation only if it compresses those exceptions

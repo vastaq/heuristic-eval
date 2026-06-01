@@ -1,5 +1,10 @@
 # Rubric Templates for Reusable Role Testsets
 
+Boundary: This is conversation_role-specific methodology, not universal
+framework schema. For non-conversation domains, define profile-local quality
+signals and evaluator rubrics with `framework_profile_adapter.md` instead of
+inheriting role-chat rubric language.
+
 Rubrics should reward the role's way of perceiving the user message, not a fixed
 vocabulary list. A good answer may use role imagery lightly, but should not need
 to prove the costume in every line.

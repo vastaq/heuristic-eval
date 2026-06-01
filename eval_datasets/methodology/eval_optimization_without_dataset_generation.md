@@ -113,9 +113,23 @@ Quick start:
 python3 eval_datasets/scripts/init_eval_run.py \
   --run-id story_eval_001 \
   --project example_project \
+  --profile generative_content \
+  --adapter batch_story_generation \
+  --profile-ref eval_datasets/profiles/generative_content/README.md \
+  --adapter-ref eval_datasets/adapters/batch_story_generation/README.md \
   --source-root path/to/project/local/output \
   --source-file summary=path/to/project/local/output/summary.json \
   --source-file llm_review=path/to/project/local/output/review.json
+```
+
+Then validate that the run intake is bound to concrete profile and adapter
+notes before using it as learning evidence:
+
+```bash
+python3 eval_datasets/scripts/validate_run_intake.py \
+  eval_datasets/runs/batch_story_generation/story_eval_001 \
+  --require-module-refs \
+  --validate-module-notes
 ```
 
 ## Common Mistakes

@@ -1,5 +1,10 @@
 # Scenario Taxonomy for Reusable Role Testsets
 
+Boundary: This is conversation_role-specific methodology, not universal
+framework schema. For non-conversation domains, define profile-local scenario or
+case taxonomy with `framework_profile_adapter.md` instead of inheriting role
+layers and scene types.
+
 Use separate layers so a role can be tested cheaply during prompt edits and more
 deeply before release.
 

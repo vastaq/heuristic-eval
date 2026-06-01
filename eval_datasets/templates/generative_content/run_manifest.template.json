@@ -13,6 +13,8 @@
     "structural_diagnostics": "path/to/heuristic-summary.json",
     "llm_review": "path/to/llm-review/review-results.json"
   },
+  "profile_ref": "",
+  "adapter_ref": "",
   "controlled_variables": [
     "example_variable_1",
     "example_variable_2"

@@ -67,4 +67,17 @@ summary. Keep these under the experiment that owns the eval pack.
 If the audit says `revise_or_supplement_eval_first`, block prompt mutation until
 the eval has been revised, supplemented with countercases, or explicitly marked
 as a biased stress test. Pass rate from a biased eval may still be useful, but
-it should not decide the next prompt shape by itself.
+it should not decide the next prompt shape by itself. The durable revision
+decision should carry `traction_audit_ref`, `human_signal_refs`,
+`eval_revision_targets` or `replay_targets`, `learning_state_ref`, and
+`event_refs` so the next loop knows which eval bias or countercase gap to fix.
+Do not use placeholder targets such as "fix later".
+
+If the audit says `inspect_before_prompt_tuning`, also block prompt mutation for
+the current decision. First record an inspection or review target, inspect the
+medium warnings against real outputs or human judgment, then make a new
+evidence-backed decision. The durable inspection decision should carry
+`traction_audit_ref`, `human_signal_refs`, `next_review_targets` or
+`replay_targets`, `learning_state_ref`, and `event_refs` so the next loop can
+continue from a concrete review target instead of a generic "audit done" note.
+Do not use placeholder targets such as "review later".

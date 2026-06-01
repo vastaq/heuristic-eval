@@ -65,16 +65,75 @@ def failure_tags(records: list[dict[str, Any]]) -> set[str]:
     return tags
 
 
-def score_records(records: list[dict[str, Any]]) -> dict[str, int]:
+def risk_flags(records: list[dict[str, Any]]) -> list[str]:
+    flags: set[str] = set()
+    risky_tags = failure_tags(records)
+    if {"stiff_response", "mechanical_tone", "unnatural_tone"} & risky_tags:
+        flags.add("naturalness_low")
+    if {"prompt_bloat_risk", "prompt_patch_pressure"} & risky_tags:
+        flags.add("prompt_bloat_risk")
+    if {"case_by_case_overfit", "overfit_risk"} & risky_tags:
+        flags.add("overfit_risk")
+
+    for record in records:
+        metadata = record.get("metadata")
+        if not isinstance(metadata, dict):
+            continue
+        naturalness = str(metadata.get("naturalness", "")).strip().lower()
+        if naturalness in {"low", "poor", "bad", "stiff", "mechanical"}:
+            flags.add("naturalness_low")
+        bloat_risk = str(metadata.get("prompt_bloat_risk", "")).strip().lower()
+        if bloat_risk in {"high", "medium_high", "severe"}:
+            flags.add("prompt_bloat_risk")
+        regression_risk = str(metadata.get("regression_risk", "")).strip().lower()
+        if regression_risk in {"high", "medium_high", "severe"}:
+            flags.add("regression_risk_high")
+    return sorted(flags)
+
+
+def has_real_model_output(observations: dict[str, Any], records: list[dict[str, Any]]) -> bool:
+    if observations.get("dry_run") is True:
+        return False
+    for record in records:
+        if record.get("dry_run") is True:
+            return False
+        output = record.get("output")
+        if not isinstance(output, str) or not output.strip() or output.strip() == "[DRY RUN]":
+            return False
+    return True
+
+
+def has_real_judge_score(records: list[dict[str, Any]]) -> bool:
+    for record in records:
+        judge = record.get("judge")
+        if not isinstance(judge, dict):
+            return False
+        score = judge.get("score")
+        if not isinstance(score, (int, float)):
+            return False
+        if judge.get("pass") not in {True, False}:
+            return False
+    return True
+
+
+def assessment_level(hard_gates: dict[str, bool]) -> str:
+    if not hard_gates["has_real_model_output"]:
+        return "dry_run"
+    if not hard_gates["has_real_judge_score"]:
+        return "unjudged_replay"
+    return "judged_replay"
+
+
+def score_records(records: list[dict[str, Any]], generality_key: str) -> dict[str, int]:
     avg_score, pass_rate = judge_stats(records)
     tags = failure_tags(records)
     dimensions = metadata_values(records, "generic_dimension")
-    roles = metadata_values(records, "role")
+    generality_values = metadata_values(records, generality_key)
 
     return {
         "user_facing_relevance": clamp_score(avg_score * 4 if avg_score else 1),
         "diagnostic_clarity": clamp_score(2 + min(len(tags), 2)),
-        "cross_project_generality": clamp_score(1 + min(len(roles) - 1, 3)),
+        "cross_project_generality": clamp_score(1 + min(len(generality_values) - 1, 3)),
         "replay_stability": clamp_score(pass_rate * 4 if avg_score else 1),
         "noise_reduction": clamp_score(2 + min(len(tags), 2)),
         "compression_value": clamp_score(1 + min(len(dimensions), 3)),
@@ -85,8 +144,12 @@ def weighted_total(scores: dict[str, int]) -> float:
     return round(sum(scores[key] * REWARD_WEIGHTS[key] for key in REWARD_WEIGHTS), 3)
 
 
-def decide(total: float, hard_gates: dict[str, bool]) -> str:
+def decide(total: float, hard_gates: dict[str, bool], level: str) -> str:
+    if level != "judged_replay":
+        return "not_assessed"
     if not hard_gates["has_replay"]:
+        return "needs_revision"
+    if not hard_gates.get("risk_signals_clear", True):
         return "needs_revision"
     if total >= 3.2 and hard_gates["has_source_trace"]:
         return "compress_candidate"
@@ -97,14 +160,24 @@ def decide(total: float, hard_gates: dict[str, bool]) -> str:
     return "retire_or_noop"
 
 
-def build_assessment(observations: dict[str, Any], observation_path: Path, mutation_id: str) -> dict[str, Any]:
+def build_assessment(
+    observations: dict[str, Any],
+    observation_path: Path,
+    mutation_id: str,
+    generality_key: str,
+) -> dict[str, Any]:
     records = observations["records"]
-    scores = score_records(records)
+    scores = score_records(records, generality_key)
+    risks = risk_flags(records)
     hard_gates = {
         "has_replay": len(records) > 0,
         "has_source_trace": all(record.get("record_id") for record in records),
         "has_judge_or_dry_run": all(isinstance(record.get("judge"), dict) for record in records),
+        "has_real_model_output": has_real_model_output(observations, records),
+        "has_real_judge_score": has_real_judge_score(records),
+        "risk_signals_clear": not risks,
     }
+    level = assessment_level(hard_gates)
     total = weighted_total(scores)
     return {
         "version": "v1",
@@ -112,11 +185,14 @@ def build_assessment(observations: dict[str, Any], observation_path: Path, mutat
         "generated_at": datetime.now().isoformat(timespec="seconds"),
         "observation_path": str(observation_path),
         "observation_run_id": observations.get("run_id"),
+        "generality_key": generality_key,
         "scores": scores,
         "weights": REWARD_WEIGHTS,
         "weighted_total": total,
+        "risk_flags": risks,
         "hard_gates": hard_gates,
-        "decision": decide(total, hard_gates),
+        "assessment_level": level,
+        "decision": decide(total, hard_gates, level),
         "notes": "Conservative automatic score; use human review before promotion.",
     }
 
@@ -126,11 +202,21 @@ def main() -> None:
     parser.add_argument("observations", type=Path)
     parser.add_argument("output", type=Path)
     parser.add_argument("--mutation-id", default="hl_mutation")
+    parser.add_argument(
+        "--generality-key",
+        default="role",
+        help="Metadata key used for cross-project generality scoring. Defaults to role for conversation evals.",
+    )
     args = parser.parse_args()
 
     try:
         observations = load_observations(args.observations)
-        assessment = build_assessment(observations, args.observations, args.mutation_id)
+        assessment = build_assessment(
+            observations,
+            args.observations,
+            args.mutation_id,
+            args.generality_key,
+        )
     except (json.JSONDecodeError, ValueError) as error:
         print(error)
         raise SystemExit(1)

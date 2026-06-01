@@ -41,6 +41,8 @@ run decision, reward assessment, or event evidence:
   "blocked_actions": [
     "prompt_patch_without_replay"
   ],
+  "source_type": "user",
+  "source_ref": "current conversation or review note",
   "needs_review": true
 }
 ```
@@ -59,6 +61,7 @@ Use `human_stop_rule` when the signal is about stopping:
   "blocked_actions": [
     "continue_prompt_tuning_for_narrow_failures"
   ],
+  "source_type": "user",
   "needs_review": false
 }
 ```
@@ -85,6 +88,8 @@ pushing the prompt toward local repairs instead of a clearer principle:
     "promote_case_patch_as_generic_learning"
   ],
   "next_action": "revise the role principle, decision order, rubric, or failure pattern before adding prompt rules",
+  "source_type": "user",
+  "source_ref": "current conversation",
   "needs_review": false
 }
 ```
@@ -121,6 +126,13 @@ When a human signal appears, the agent should:
    before any new prompt rule.
 7. Update learning state, reward assessment, event evidence, or experiment
    summary only when the signal changes the next action.
+
+Use `source_type: "user"` for a signal that preserves the user's judgment. If
+the agent is only inferring a signal from artifacts, use
+`source_type: "agent_inference"` and keep `needs_review: true`; agent inference
+must not masquerade as reviewed human evidence. Any `needs_review: false` signal
+must carry a non-empty `source_type` so later decisions do not treat anonymous
+agent-created JSON as reviewed human judgment.
 
 Do not ask humans to fill large review forms unless the project explicitly
 chooses that workflow. The default interaction should be a short judgment that

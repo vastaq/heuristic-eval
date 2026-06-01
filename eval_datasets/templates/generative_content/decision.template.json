@@ -23,6 +23,23 @@
   "next_actions": [
     "state the next smallest useful action"
   ],
+  "replay_targets": [],
+  "learning_state_ref": "",
+  "learning_state_not_needed_reason": "",
+  "event_refs": [],
+  "failure_pattern_refs": [],
+  "failure_pattern_deferred_reason": "",
+  "prompt_bloat_gate": {
+    "checked": false,
+    "risk": "unknown",
+    "decision": "not_assessed",
+    "traction_audit_ref": "",
+    "traction_audit_not_needed_reason": "",
+    "repeated_failure_basis": "",
+    "non_prompt_alternatives_considered": [],
+    "ordinary_interaction_risk": "unknown",
+    "removal_condition": ""
+  },
   "dataset_generation": {
     "needed": false,
     "reason": "No repeated judgeable regression case yet."

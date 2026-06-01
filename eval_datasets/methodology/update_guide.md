@@ -1,5 +1,10 @@
 # Updating Reusable Role Testsets
 
+Boundary: This is conversation_role-specific methodology, not universal
+framework schema. For non-conversation domains, define profile-local import,
+review, and promotion rules with `framework_profile_adapter.md` instead of
+inheriting role fields or Promptfoo assumptions.
+
 Use this workflow when adding or improving role tests. The goal is to keep old
 tests available while building a reviewed, reusable canonical dataset.
 

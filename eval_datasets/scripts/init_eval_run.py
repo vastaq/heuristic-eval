@@ -12,6 +12,64 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 
 
+def default_manifest_template(profile: str, adapter: str) -> dict:
+    return {
+        "run_id": "",
+        "project": "",
+        "profile": profile,
+        "adapter": adapter,
+        "created_at": "",
+        "source_artifact_root": "",
+        "source_files": {},
+        "profile_ref": "",
+        "adapter_ref": "",
+        "controlled_variables": [],
+        "content_units": [],
+        "case_count": 0,
+        "success_count": 0,
+        "failure_count": 0,
+        "notes": "",
+    }
+
+
+def default_decision_template(profile: str, adapter: str) -> dict:
+    return {
+        "decision_id": "",
+        "run_id": "",
+        "profile": profile,
+        "adapter": adapter,
+        "decision_type": "needs_decision",
+        "accepted_direction": None,
+        "primary_reason": "Summarize the main evidence in one sentence.",
+        "score_interpretation": {
+            "primary_quality_signal": "",
+            "diagnostic_only_signals": [],
+            "downgraded_metrics": [],
+        },
+        "human_signal_refs": [],
+        "blocked_actions": ["prompt_patch_without_replay"],
+        "next_actions": ["state the next smallest useful action"],
+        "replay_targets": [],
+        "learning_state_ref": "",
+        "learning_state_not_needed_reason": "",
+        "event_refs": [],
+        "failure_pattern_refs": [],
+        "failure_pattern_deferred_reason": "",
+        "prompt_bloat_gate": {
+            "checked": False,
+            "risk": "unknown",
+            "decision": "not_assessed",
+            "traction_audit_ref": "",
+            "traction_audit_not_needed_reason": "",
+        },
+        "dataset_generation": {
+            "needed": False,
+            "reason": "No repeated judgeable regression case yet.",
+        },
+        "notes": "",
+    }
+
+
 def parse_key_value(items: list[str]) -> dict[str, str]:
     parsed: dict[str, str] = {}
     for item in items:
@@ -21,7 +79,10 @@ def parse_key_value(items: list[str]) -> dict[str, str]:
         key = key.strip()
         if not key:
             raise SystemExit(f"empty source-file key in: {item}")
-        parsed[key] = value.strip()
+        value = value.strip()
+        if not value:
+            raise SystemExit(f"empty source-file value for key: {key}")
+        parsed[key] = value
     return parsed
 
 
@@ -36,16 +97,18 @@ def parse_optional_bool(value: str) -> bool | None:
     raise SystemExit(f"expected true, false, or null for accepted direction, got: {value}")
 
 
-def default_accepted_direction(decision_type: str) -> bool | None:
-    if decision_type == "accept_direction":
-        return True
-    if decision_type in {"accept_variance", "stop_tuning"}:
-        return True
+def default_accepted_direction(_decision_type: str) -> bool | None:
     return None
 
 
 def load_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def load_template(path: Path, fallback: dict) -> dict:
+    if path.exists():
+        return load_json(path)
+    return dict(fallback)
 
 
 def write_json(path: Path, payload: dict) -> None:
@@ -61,8 +124,14 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--profile", default="generative_content")
     parser.add_argument("--adapter", default="batch_story_generation")
     parser.add_argument("--output-dir")
-    parser.add_argument("--source-root", default="path/to/project/local/output")
+    parser.add_argument(
+        "--source-root",
+        default="",
+        help="Optional local source root reference. Leave unset instead of writing placeholder paths.",
+    )
     parser.add_argument("--source-file", action="append", default=[], help="Source reference as KEY=PATH")
+    parser.add_argument("--profile-ref", default="", help="Optional path to profile module notes.")
+    parser.add_argument("--adapter-ref", default="", help="Optional path to adapter module notes.")
     parser.add_argument("--controlled-variable", action="append", default=[])
     parser.add_argument("--content-unit", action="append", default=[])
     parser.add_argument("--case-count", type=int, default=0)
@@ -72,7 +141,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--accepted-direction",
         choices=("true", "false", "null"),
-        help="Override accepted_direction; defaults to true only for accept_direction-like outcomes.",
+        help="Set accepted_direction explicitly; defaults to null even for accept-like decision types.",
     )
     parser.add_argument("--primary-reason", default="Summarize the main evidence in one sentence.")
     parser.add_argument("--notes", default="")
@@ -89,8 +158,14 @@ def main() -> int:
     output_dir.mkdir(parents=True, exist_ok=True)
 
     template_dir = ROOT / "eval_datasets" / "templates" / args.profile
-    manifest = load_json(template_dir / "run_manifest.template.json")
-    decision = load_json(template_dir / "decision.template.json")
+    manifest = load_template(
+        template_dir / "run_manifest.template.json",
+        default_manifest_template(args.profile, args.adapter),
+    )
+    decision = load_template(
+        template_dir / "decision.template.json",
+        default_decision_template(args.profile, args.adapter),
+    )
 
     source_files = parse_key_value(args.source_file)
     accepted_direction = (
@@ -109,6 +184,8 @@ def main() -> int:
             "created_at": created_at,
             "source_artifact_root": args.source_root,
             "source_files": source_files,
+            "profile_ref": args.profile_ref,
+            "adapter_ref": args.adapter_ref,
             "controlled_variables": args.controlled_variable,
             "content_units": args.content_unit,
             "case_count": args.case_count,

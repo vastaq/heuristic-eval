@@ -1,5 +1,10 @@
 # Conversation Core Taxonomy
 
+Boundary: This is conversation_role-specific methodology, not universal
+framework schema. For non-conversation domains, define profile-local fields and
+promotion rules with `framework_profile_adapter.md` instead of inheriting these
+dimensions.
+
 The conversation core is a small, reusable test layer for user-facing dialogue
 roles. It should generalize across companion roles, character roles, and
 lightweight task helpers with personality. Project-specific imagery belongs in

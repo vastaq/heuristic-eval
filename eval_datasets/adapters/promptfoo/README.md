@@ -20,6 +20,11 @@ Current reference scripts:
 - `eval_datasets/scripts/batch_import_test_yaml.py`
 - `eval_datasets/scripts/normalize_promptfoo_results.py`
 
+Promptfoo scripts are adapter-specific examples, not the framework encoding. Do
+not use Promptfoo import/export scripts for non-Promptfoo evaluators; create an
+adapter-specific normalizer, importer, or exporter that preserves the local
+runner's evidence shape.
+
 When adding a different evaluator, create a separate adapter instead of forcing
 its file shape into Promptfoo fields.
 

@@ -1,5 +1,10 @@
 # Testset Evolution Protocol
 
+Boundary: This is conversation_role-specific methodology, not universal
+framework schema. For non-conversation domains, define profile-local layers,
+fields, and promotion rules with `framework_profile_adapter.md` instead of
+inheriting conversation core destinations.
+
 This protocol treats `eval_datasets` as an evolving memory system for
 user-facing conversation roles. Raw evaluation assets are preserved for
 traceability, while a smaller reviewed core is continuously distilled from
