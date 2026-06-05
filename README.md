@@ -329,6 +329,13 @@ private data store. Use Hugging Face or another shared dataset host only after
 the data is scrubbed, licensed, intentionally public, and separated from private
 prompt or product evidence.
 
+## License
+
+MIT. See `LICENSE`.
+
+The license covers this framework repository, not downstream private eval data,
+prompts, or project artifacts.
+
 ## Quick Checks
 
 ```bash
