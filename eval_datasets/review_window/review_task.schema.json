@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "heuristic-eval review task",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "task_id",
+    "task_type",
+    "profile",
+    "target_id",
+    "audio_refs",
+    "context",
+    "choices"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string"
+    },
+    "task_id": {
+      "type": "string"
+    },
+    "task_type": {
+      "type": "string"
+    },
+    "profile": {
+      "type": "string"
+    },
+    "target_id": {
+      "type": "string"
+    },
+    "audio_refs": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "context": {
+      "type": "object"
+    },
+    "choices": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "evidence_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": true
+}

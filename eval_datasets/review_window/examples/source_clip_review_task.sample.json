@@ -1,0 +1,28 @@
+{
+  "schema_version": "heuristic_eval.review_task.v0",
+  "task_id": "task_source_0001",
+  "task_type": "source_clip_review",
+  "profile": "voice_clone_asset",
+  "target_id": "raw_0001",
+  "audio_refs": {
+    "source": "local://raw_bank/sample_character/raw_0001.wav"
+  },
+  "context": {
+    "character_id": "sample_character",
+    "transcript": "We can take this one step at a time.",
+    "auto_gate": {
+      "technical_quality": "pass",
+      "speed": "pass"
+    }
+  },
+  "choices": [
+    "anchor_bank",
+    "candidate_bank",
+    "negative_bank",
+    "discard",
+    "uncertain"
+  ],
+  "evidence_refs": [
+    "source_clip_report.sample.json"
+  ]
+}

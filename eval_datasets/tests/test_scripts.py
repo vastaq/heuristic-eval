@@ -4,6 +4,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -9686,6 +9687,109 @@ band.
 
             self.assertEqual(result.returncode, 1)
             self.assertIn("records must be a non-empty list", result.stdout)
+
+    def test_voice_clone_asset_public_profile_files_exist(self) -> None:
+        profile = ROOT / "eval_datasets" / "profiles" / "voice_clone_asset"
+        expected = {
+            "README.md",
+            "schema.md",
+            "failure_taxonomy.md",
+            "routing_rules.yaml",
+            "review_protocol.md",
+            "calibration.md",
+        }
+
+        files = {path.name for path in profile.iterdir() if path.is_file()}
+        self.assertTrue(expected.issubset(files), files)
+
+        readme = (profile / "README.md").read_text(encoding="utf-8")
+        self.assertIn("source material issue", readme)
+        self.assertIn("speaker identity drift", readme)
+        self.assertIn("speed or pause regression", readme)
+        self.assertIn("stop fixing cloned voices at the wrong layer", readme)
+
+    def test_voice_clone_asset_minimal_examples_are_synthetic_json(self) -> None:
+        example = ROOT / "eval_datasets" / "examples" / "voice_clone_asset_minimal"
+        json_files = sorted(example.glob("*.json"))
+
+        self.assertGreaterEqual(len(json_files), 5)
+        for path in json_files:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+            text = json.dumps(payload)
+            self.assertIn("sample_character", text)
+            self.assertNotIn("TapDoki", text)
+            self.assertNotIn("Slowpoke", text)
+            self.assertNotIn("child_puzzle", text)
+            self.assertNotIn("secret", text.lower())
+            self.assertNotIn("token", text.lower())
+
+            for value in self._walk_json_values(payload):
+                if isinstance(value, str) and value.endswith(".wav"):
+                    self.assertTrue(value.startswith("local://"), value)
+
+    def test_voice_clone_asset_route_blocks_wrong_layer_fixes(self) -> None:
+        route = json.loads(
+            (
+                ROOT
+                / "eval_datasets"
+                / "examples"
+                / "voice_clone_asset_minimal"
+                / "route_decision.expected.json"
+            ).read_text(encoding="utf-8")
+        )
+
+        self.assertEqual(route["primary_failure"], "speed_regression")
+        self.assertIn("do_not_add_random_source_audio", route["blocked_actions"])
+        self.assertIn("do_not_replace_clone_model_blindly", route["blocked_actions"])
+        self.assertIn("rerun_regression_bank", route["next_actions"])
+        self.assertTrue(route["human_review_required"])
+
+    def test_review_window_examples_are_audio_ref_only(self) -> None:
+        review_window = ROOT / "eval_datasets" / "review_window"
+        examples = sorted((review_window / "examples").glob("*.json"))
+
+        self.assertEqual(
+            {
+                "clone_ab_review_task.sample.json",
+                "output_issue_review_task.sample.json",
+                "source_clip_review_task.sample.json",
+            },
+            {path.name for path in examples},
+        )
+        for path in examples:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+            self.assertEqual(payload["profile"], "voice_clone_asset")
+            self.assertIn(payload["task_type"], {"source_clip_review", "clone_ab_review", "output_issue_review"})
+            self.assertIsInstance(payload["audio_refs"], dict)
+            self.assertTrue(payload["audio_refs"])
+            for audio_ref in payload["audio_refs"].values():
+                self.assertTrue(audio_ref.startswith("local://"), audio_ref)
+
+    def test_voice_clone_asset_docs_keep_public_data_boundary(self) -> None:
+        paths = [
+            ROOT / "eval_datasets" / "profiles" / "voice_clone_asset" / "README.md",
+            ROOT / "eval_datasets" / "profiles" / "voice_clone_asset" / "schema.md",
+            ROOT / "eval_datasets" / "review_window" / "README.md",
+            ROOT / "eval_datasets" / "examples" / "voice_clone_asset_minimal" / "README.md",
+        ]
+
+        combined = "\n".join(path.read_text(encoding="utf-8") for path in paths)
+        self.assertIn("Do not commit real audio", combined)
+        self.assertIn("private", combined)
+        self.assertIn("human", combined.lower())
+
+    def _walk_json_values(self, value: Any) -> list[Any]:
+        if isinstance(value, dict):
+            values: list[Any] = []
+            for child in value.values():
+                values.extend(self._walk_json_values(child))
+            return values
+        if isinstance(value, list):
+            values = []
+            for child in value:
+                values.extend(self._walk_json_values(child))
+            return values
+        return [value]
 
 
 if __name__ == "__main__":

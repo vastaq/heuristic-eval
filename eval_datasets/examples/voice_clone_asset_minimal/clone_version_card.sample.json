@@ -1,0 +1,24 @@
+{
+  "schema_version": "voice_clone_asset.clone_version.v0",
+  "voice_model_version": "sample_character_v2",
+  "character_id": "sample_character",
+  "source_pack_id": "sample_character_source_pack_v2",
+  "created_at": "2026-06-10",
+  "source_pack_summary": {
+    "anchor_clip_count": 24,
+    "candidate_clip_count": 96,
+    "negative_excluded_count": 12,
+    "total_duration_min": 43.5
+  },
+  "preprocessing": {
+    "denoise": "light",
+    "loudness_normalization": "-23_lufs",
+    "segment_duration_range_sec": [
+      3,
+      12
+    ],
+    "transcript_checked": true,
+    "multi_speaker_removed": true
+  },
+  "change_note": "Removed fast outliers and added calm anchors."
+}

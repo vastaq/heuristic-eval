@@ -1,0 +1,59 @@
+profile: voice_clone_asset
+version: v0
+
+rules:
+  - when: source_noise_contamination
+    block:
+      - do_not_retrain_with_current_source_pack
+      - do_not_judge_character_similarity_before_quality_passes
+    next:
+      - remove_or_reprocess_noisy_clips
+      - rerun_source_qc
+      - regenerate_candidate_bank
+
+  - when: source_transcript_mismatch
+    block:
+      - do_not_use_clip_as_anchor
+      - do_not_train_until_transcript_is_fixed
+    next:
+      - correct_transcript
+      - rerun_asr_alignment
+      - send_to_human_review_if_uncertain
+
+  - when: speaker_identity_drift
+    block:
+      - do_not_optimize_speed_first
+      - do_not_accept_version_without_ab_review
+    next:
+      - compare_output_embedding_to_anchor_centroid
+      - inspect_source_pack_speaker_consistency
+      - run_ab_review_against_previous_version
+
+  - when: speed_regression
+    block:
+      - do_not_replace_speaker_anchors
+      - do_not_blame_identity_similarity_first
+    next:
+      - compare_speed_distribution_current_vs_previous
+      - check_segmentation_strategy
+      - remove_fast_or_slow_outlier_sources
+      - add_normal_pacing_anchors
+
+  - when: character_style_drift
+    block:
+      - do_not_add_random_source_audio
+      - do_not_treat_metric_similarity_as_style_proof
+    next:
+      - inspect_anchor_bank_style_coverage
+      - add_positive_style_anchors
+      - move_style_mismatched_clips_to_negative_bank
+      - create_character_style_regression_case
+
+  - when: reviewer_disagreement
+    block:
+      - do_not_promote_to_anchor
+      - do_not_update_threshold
+    next:
+      - send_to_voice_director_review
+      - add_to_borderline_bank
+      - clarify_character_definition

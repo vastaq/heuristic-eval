@@ -1,0 +1,23 @@
+profile: voice_clone_asset
+character_id: sample_character
+voice_asset_goal: calm_warm_guidance_voice
+
+source_banks:
+  raw_bank: local://raw_bank/sample_character/
+  candidate_bank: local://candidate_bank/sample_character/
+  anchor_bank: local://anchor_bank/sample_character/
+  negative_bank: local://negative_bank/sample_character/
+  regression_bank: local://regression_bank/sample_character/
+
+calibration:
+  speaker_similarity_pass_min: 0.76
+  speaker_similarity_fail_max: 0.68
+  chars_per_second_pass_range: [3.4, 4.8]
+  pause_ratio_pass_range: [0.1, 0.24]
+
+review_policy:
+  human_review_required_for:
+    - anchor_promotion
+    - speaker_identity_borderline
+    - character_style_drift
+    - version_regression

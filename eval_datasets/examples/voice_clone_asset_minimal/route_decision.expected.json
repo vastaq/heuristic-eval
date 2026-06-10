@@ -1,0 +1,26 @@
+{
+  "schema_version": "voice_clone_asset.route_decision.v0",
+  "decision_id": "decision_sample_character_v2_reg_001",
+  "input_result_id": "sample_character_v2_reg_001",
+  "status": "fail",
+  "primary_failure": "speed_regression",
+  "secondary_failures": [
+    "pause_regression",
+    "speaker_identity_drift"
+  ],
+  "blocked_actions": [
+    "do_not_replace_clone_model_blindly",
+    "do_not_add_random_source_audio",
+    "do_not_update_anchor_threshold_from_this_case"
+  ],
+  "next_actions": [
+    "compare_source_pack_speed_distribution_v1_vs_v2",
+    "inspect_fast_clips_added_in_v2",
+    "move_confirmed_fast_style_mismatch_clips_to_negative_bank",
+    "add_normal_pacing_anchors",
+    "rerun_regression_bank"
+  ],
+  "human_review_required": true,
+  "create_regression_case": true,
+  "notes": "Output is technically clean but too fast and less character-like."
+}

@@ -1,0 +1,16 @@
+{
+  "schema_version": "voice_clone_asset.human_review.v0",
+  "review_id": "review_source_0001",
+  "task_type": "source_clip_review",
+  "reviewer_role": "voice_director",
+  "character_id": "sample_character",
+  "target_id": "raw_0001",
+  "decision": "anchor_bank",
+  "tags": [
+    "clear",
+    "in_character",
+    "normal_pacing"
+  ],
+  "confidence": "high",
+  "notes": "Usable as a normal speaking anchor."
+}

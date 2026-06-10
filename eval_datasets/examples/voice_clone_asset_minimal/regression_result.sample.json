@@ -1,0 +1,40 @@
+{
+  "schema_version": "voice_clone_asset.regression_result.v0",
+  "result_id": "sample_character_v2_reg_001",
+  "character_id": "sample_character",
+  "voice_model_version": "sample_character_v2",
+  "previous_version": "sample_character_v1",
+  "test_item_id": "neutral_short_001",
+  "text": "We can take this one step at a time.",
+  "output_audio_uri": "local://outputs/sample_character_v2/reg_001.wav",
+  "auto_metrics": {
+    "asr_cer": 0.03,
+    "speaker_similarity_to_anchor_centroid": 0.72,
+    "chars_per_second": 5.92,
+    "pause_ratio": 0.05,
+    "f0_median_hz": 181.4
+  },
+  "profile_expectation": {
+    "speaker_similarity_min": 0.75,
+    "chars_per_second_range": [
+      3.4,
+      4.8
+    ],
+    "pause_ratio_range": [
+      0.1,
+      0.24
+    ]
+  },
+  "auto_gate": {
+    "technical_quality": "pass",
+    "intelligibility": "pass",
+    "speaker_identity": "borderline",
+    "speed": "fail",
+    "pause": "fail"
+  },
+  "human_review": {
+    "required": true,
+    "reason": "speed_fail_and_identity_borderline",
+    "status": "pending"
+  }
+}

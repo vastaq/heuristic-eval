@@ -1,0 +1,26 @@
+{
+  "schema_version": "heuristic_eval.review_task.v0",
+  "task_id": "task_output_0001",
+  "task_type": "output_issue_review",
+  "profile": "voice_clone_asset",
+  "target_id": "sample_character_v2_reg_001",
+  "audio_refs": {
+    "output": "local://outputs/sample_character_v2/reg_001.wav"
+  },
+  "context": {
+    "primary_auto_failure": "speed_regression",
+    "secondary_auto_failures": [
+      "pause_regression",
+      "speaker_identity_drift"
+    ]
+  },
+  "choices": [
+    "usable",
+    "needs_revision",
+    "reject",
+    "uncertain"
+  ],
+  "evidence_refs": [
+    "regression_result.sample.json"
+  ]
+}

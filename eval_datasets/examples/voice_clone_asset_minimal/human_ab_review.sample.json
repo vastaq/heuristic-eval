@@ -1,0 +1,17 @@
+{
+  "schema_version": "voice_clone_asset.human_review.v0",
+  "review_id": "review_ab_0001",
+  "task_type": "clone_ab_review",
+  "character_id": "sample_character",
+  "test_item_id": "neutral_short_001",
+  "version_a": "sample_character_v1",
+  "version_b": "sample_character_v2",
+  "preference": "A",
+  "main_difference": [
+    "speed",
+    "pause",
+    "character_style"
+  ],
+  "confidence": "medium",
+  "notes": "Version B is cleaner but too fast; version A keeps the intended pacing."
+}

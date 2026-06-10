@@ -73,6 +73,20 @@ Use when a project already has local generated outputs, diagnostics, LLM review,
 or human judgment, and the right artifact is a run decision rather than a new
 canonical dataset.
 
+### Voice Clone Asset Eval
+
+Read:
+
+- `../profiles/voice_clone_asset/README.md`
+- `../profiles/voice_clone_asset/failure_taxonomy.md`
+- `../profiles/voice_clone_asset/review_protocol.md`
+- `../profiles/voice_clone_asset/calibration.md`
+
+Use when cloned character voices need source-bank governance, anchor/negative
+management, human A/B review, clone-version regression, and failure routing.
+This route should not ship real audio, speaker identities, transcripts, or
+private voice prompts in the public framework repo.
+
 ## Advanced System References
 
 - `heuristic_system_spec.md`: state, action space, reward model, replay policy,

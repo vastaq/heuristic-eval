@@ -1,0 +1,29 @@
+{
+  "schema_version": "voice_clone_asset.source_clip.v0",
+  "clip_id": "raw_0001",
+  "character_id": "sample_character",
+  "audio_uri": "local://raw_bank/sample_character/raw_0001.wav",
+  "transcript": "We can take this one step at a time.",
+  "duration_sec": 4.82,
+  "auto_metrics": {
+    "sample_rate": 48000,
+    "channels": 1,
+    "clipping_ratio": 0.001,
+    "silence_ratio": 0.14,
+    "rms_mean": 0.061,
+    "chars_per_second": 4.15,
+    "f0_median_hz": 178.2
+  },
+  "auto_gate": {
+    "technical_quality": "pass",
+    "noise": "pass",
+    "duration": "pass",
+    "speed": "pass",
+    "speaker_consistency": "unknown"
+  },
+  "review": {
+    "required": true,
+    "reason": "candidate_anchor_selection",
+    "status": "pending"
+  }
+}

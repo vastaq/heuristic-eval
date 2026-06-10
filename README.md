@@ -63,6 +63,12 @@ Do not force every task into the bundled conversation-role schema. For TTS,
 coding, retrieval, tool use, content generation, or another domain, create a
 profile and adapter that match the local evidence shape.
 
+The repository includes an experimental `voice_clone_asset` profile for cloned
+voice asset governance. It focuses on source banks, anchor and negative
+examples, clone-version regression, human A/B review, and routing failures to
+the right layer. It does not include real audio or claim fully automatic voice
+quality judgment.
+
 Use three layers:
 
 - **Framework**: shared concepts such as run intake, learning state, reward
@@ -294,6 +300,7 @@ eval_datasets/
   methodology/             # Framework guidance and profile references
   profiles/                # Domain-specific schema and rubric notes
   adapters/                # Evaluator-specific adapter notes
+  review_window/           # Lightweight human-review task/result protocol
   templates/               # Copyable run, decision, and signal templates
   examples/                # Public examples without private data
   scripts/                 # Working primitives and adapter examples

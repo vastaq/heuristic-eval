@@ -1,0 +1,27 @@
+{
+  "schema_version": "heuristic_eval.review_task.v0",
+  "task_id": "task_ab_0001",
+  "task_type": "clone_ab_review",
+  "profile": "voice_clone_asset",
+  "target_id": "neutral_short_001",
+  "audio_refs": {
+    "reference": "local://anchor_bank/sample_character/anchor_0001.wav",
+    "A": "local://outputs/sample_character_v1/reg_001.wav",
+    "B": "local://outputs/sample_character_v2/reg_001.wav"
+  },
+  "context": {
+    "character_id": "sample_character",
+    "test_item_id": "neutral_short_001",
+    "text": "We can take this one step at a time."
+  },
+  "choices": [
+    "A",
+    "B",
+    "similar",
+    "neither",
+    "uncertain"
+  ],
+  "evidence_refs": [
+    "regression_result.sample.json"
+  ]
+}
